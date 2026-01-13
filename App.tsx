@@ -10,23 +10,26 @@ const HISTORY_KEY = 'divine_echo_history_v2';
 const AUTHOR_KEY = 'divine_echo_author_name';
 const DEFAULT_AUTHOR = "Babátúndé Awóyẹmí";
 
+const getLocalDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const ShimmerLoader: React.FC<{ text: string }> = ({ text }) => (
   <div className="flex flex-col items-center justify-center space-y-12 animate-in fade-in zoom-in-95 duration-1000">
     <div className="relative w-40 h-40 flex items-center justify-center">
-      {/* Outer spinning ring */}
       <div className="absolute inset-0 border-4 border-indigo-500/10 rounded-full"></div>
       <div className="absolute inset-0 border-4 border-t-indigo-600 rounded-full animate-spin"></div>
-      
-      {/* Pulsing inner rings */}
       <div className="absolute inset-4 border-2 border-slate-200 dark:border-white/10 rounded-full animate-pulse-slow"></div>
       <div className="absolute inset-8 border-2 border-indigo-500/20 rounded-full animate-pulse"></div>
-      
-      {/* Floating center dot */}
       <div className="w-3 h-3 bg-indigo-600 rounded-full shadow-[0_0_20px_rgba(79,70,229,0.8)] animate-float"></div>
     </div>
     <div className="space-y-4 text-center">
       <h2 className="text-3xl font-serif italic text-slate-800 dark:text-slate-100 animate-pulse">{text}</h2>
-      <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-black animate-shimmer">Aligning temporal frequencies...</p>
+      <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-black">Aligning temporal frequencies...</p>
     </div>
   </div>
 );
@@ -73,7 +76,7 @@ const MainApp: React.FC = () => {
   const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.SETUP);
   const [data, setData] = useState<InspirationData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [authorName, setAuthorName] = useState<string>(localStorage.getItem(AUTHOR_KEY) || DEFAULT_AUTHOR);
   const [history, setHistory] = useState<InspirationData[]>([]);
   const [recommendations, setRecommendations] = useState<HistoricalRecommendation[]>([]);
@@ -99,14 +102,22 @@ const MainApp: React.FC = () => {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
   }, [history]);
 
-  const dayInfo = useMemo(() => getDayOfYearInfo(new Date(selectedDate)), [selectedDate]);
+  const dayInfo = useMemo(() => {
+    // Ensure we parse the date correctly relative to user's timezone
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    return getDayOfYearInfo(new Date(year, month - 1, day));
+  }, [selectedDate]);
 
   const handleFetchRecommendations = useCallback(async () => {
     try {
       setError(null);
-      setLoadingState(LoadingState.CHOOSING_EVENT);
-      const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 10);
-      setRecommendations(recs);
+      // Brief transitional state for better UX
+      setLoadingState(LoadingState.IDLE);
+      setTimeout(async () => {
+        setLoadingState(LoadingState.CHOOSING_EVENT);
+        const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 10);
+        setRecommendations(recs);
+      }, 100);
     } catch (err: any) {
       setError(err.message);
       setLoadingState(LoadingState.ERROR);
@@ -195,28 +206,39 @@ const MainApp: React.FC = () => {
       )}
 
       {loadingState === LoadingState.CHOOSING_EVENT && (
-        <div className="max-w-4xl w-full my-auto space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20 pt-10 px-4">
-          <div className="text-center space-y-4">
-            <h2 className="text-3xl font-serif font-bold text-slate-900 dark:text-white">Resonance Threads</h2>
-            <p className="text-[10px] text-slate-400 uppercase tracking-[0.4em] font-black">Archive Extraction Successful</p>
+        <div className="max-w-5xl w-full my-auto space-y-16 animate-in fade-in zoom-in-95 slide-in-from-bottom-20 duration-1000 pb-24 pt-10 px-4">
+          <div className="text-center space-y-6">
+            <h2 className="text-4xl sm:text-5xl font-serif font-bold text-slate-900 dark:text-white tracking-tight">Resonance Threads</h2>
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.6em] font-black">Archive Extraction Successful</p>
+              <div className="w-12 h-1 bg-indigo-500/30 rounded-full" />
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {recommendations.map((rec, idx) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recommendations.length > 0 ? recommendations.map((rec, idx) => (
               <button 
                 key={rec.id} 
                 onClick={() => handleSelectEvent(rec)} 
-                className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[2.5rem] text-left hover:border-indigo-500/50 hover:shadow-2xl transition-all group active:scale-95 flex flex-col h-full shadow-md animate-in slide-in-from-bottom-4 duration-500"
-                style={{ animationDelay: `${idx * 100}ms` }}
+                className="p-10 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[3rem] text-left hover:border-indigo-500/50 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] transition-all group active:scale-95 flex flex-col h-full shadow-lg relative overflow-hidden animate-in slide-in-from-bottom-12 fade-in fill-mode-both"
+                style={{ animationDelay: `${idx * 80}ms` }}
               >
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight pr-3">{rec.title}</h3>
-                  <span className="text-[9px] font-black bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded text-indigo-600 dark:text-indigo-400 shrink-0">{rec.year}</span>
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none group-hover:bg-indigo-500/10 transition-colors" />
+                <div className="flex justify-between items-start mb-6">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight pr-4">{rec.title}</h3>
+                  <span className="text-[10px] font-black bg-indigo-50 dark:bg-indigo-500/20 px-3 py-1 rounded-full text-indigo-600 dark:text-indigo-400 shrink-0 border border-indigo-100 dark:border-indigo-500/20">{rec.year}</span>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-serif italic leading-relaxed mt-auto line-clamp-3">{rec.description}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-serif italic leading-relaxed mt-auto line-clamp-4 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{rec.description}</p>
               </button>
-            ))}
+            )) : (
+              <div className="col-span-full py-20 text-center space-y-4">
+                <div className="w-12 h-12 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-xs uppercase font-black tracking-widest text-slate-400">Accessing Archives...</p>
+              </div>
+            )}
           </div>
-          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-4 text-[10px] uppercase font-black text-slate-400 dark:text-white/20 hover:text-slate-900 dark:hover:text-white transition-all tracking-[0.4em]">Abort Archive Sync</button>
+          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-6 text-[10px] uppercase font-black text-slate-400 dark:text-white/20 hover:text-slate-900 dark:hover:text-white transition-all tracking-[0.5em] group">
+            <span className="group-hover:tracking-[0.7em] transition-all">Abort Archive Sync</span>
+          </button>
         </div>
       )}
 
