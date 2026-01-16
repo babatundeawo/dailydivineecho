@@ -13,6 +13,7 @@ export interface InspirationData {
   dateString: string;
   eventTitle: string;
   eventDescription: string;
+  imageOverlayText?: string;
   eventLocation?: string;
   bibleVerse: string;
   bibleReference: string;

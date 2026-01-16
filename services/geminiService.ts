@@ -54,19 +54,29 @@ export const fetchDailyInspiration = async (dayInfo: {
     Selected Event: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year})
 
     TASKS:
-    1. Expand into a FULL-LENGTH LinkedIn post (2000-2500 characters).
-       TONE: Human-centered, professional, conversational, and resonant.
-       STYLE: Infuse a distinctive Nigerian conversational flavor—expressed through warmth, rhythm, and familiarity (e.g., "You see, my friend," "The elders say..."). Use metaphors and storytelling to carry the reader. Do not reference specific Nigerian locations.
-       CONTENT: Connect the historical event ${dayInfo.selectedEvent.title} to modern leadership, resilience, or personal growth. Make it globally relevant for professionals, educators, and students.
-    2. Provide a concise Twitter/X post (max 260 characters).
-    3. Provide a related Bible verse and reference (theme: resilience/legacy).
-    4. Provide a universal reflection prompt (max 25 words).
-    5. Provide a 35-word cinematic image prompt focusing on high-detail realism. Ensure the scene is bright, luminous, and visually striking. NO TEXT.
+    1. LinkedIn Post (2000-2500 characters):
+       - TONE: Spellbinding, humanized, and profoundly captivating.
+       - AUDIENCE: Global (professionals, beginners, young, old, leaders, followers).
+       - STYLE: Use diverse literary devices—metaphors, euphemisms, light sarcasm where appropriate, and calculated exaggeration to drive points home. Carry the reader along like a master storyteller. 
+       - CONSTRAINTS: NO unnecessary hyphens. Avoid robotic "AI-sounding" listicles. Use localized references from any relevant global location to add flavor, but keep the core message universal.
+       - THEME: Accurate historical context blended with modern leadership and life lessons.
+
+    2. Bible Verse & Reference:
+       - CRITICAL: Select a verse that is DIRECTLY and INTIMATELY related to the themes of the historical event (e.g., if it's about a discovery, use a verse about light or hidden wisdom; if it's about a battle, use a verse about peace or courage).
+
+    3. Image Overlay Text:
+       - A very short, punchy summary (max 12 words) that captures the soul of the event. This will be the centerpiece of the visual.
+
+    4. Twitter/X Resonance: Concise (max 260 characters).
+
+    5. Image Prompt:
+       - Technical details for EXTREME photorealism. Specify: "Kodak Portra 400 feel", "sharp 85mm lens details", "natural cinematic lighting", "highly detailed skin/surface textures", "realistic shadows", "no distortions".
 
     Return as JSON:
     {
       "eventTitle": "...",
       "eventDescription": "...",
+      "imageOverlayText": "...",
       "bibleVerse": "...",
       "bibleReference": "...",
       "reflectionPrompt": "...",
@@ -77,7 +87,7 @@ export const fetchDailyInspiration = async (dayInfo: {
   `;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-pro-preview',
     contents: prompt,
     config: { responseMimeType: 'application/json' }
   });
@@ -102,7 +112,8 @@ export const generateInspirationalImage = async (
   aspectRatio: "1:1" | "3:4" | "4:3" | "9:16" | "16:9" = "3:4"
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const prompt = `Hyper-realistic, bright, and vibrant masterpiece. Subject: ${data.eventTitle}. Vision: ${data.imagePrompt}. Aesthetic: High luminosity, golden hour daylight, crystal clear sharpness, 8K resolution. NO TEXT, NO LOGOS. The image should be extremely bright and visible.`;
+  // Emphasizing extreme realism to the image model
+  const prompt = `A masterwork of photography, hyper-realistic, 8k resolution. Subject: ${data.eventTitle}. Scene details: ${data.imagePrompt}. Lighting: Dramatic natural lighting, realistic atmosphere. Quality: National Geographic award-winning quality, sharp textures, perfectly realistic, no digital artifacts, NO TEXT on image.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
