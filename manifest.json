@@ -1,24 +1,16 @@
-
 {
-  "name": "Daily Divine Echo",
-  "short_name": "Divine Echo",
-  "description": "Daily historical inspiration and spiritual reflection companion for 2026.",
+  "short_name": "DivineEcho",
+  "name": "Divine Echo",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#020617",
   "theme_color": "#020617",
-  "orientation": "portrait",
+  "background_color": "#020617",
+  "description": "Resonance for the Modern Leader. A high-performance personal growth engine blending historical insight, generative AI, and cinematic storytelling.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3249/3249935.png",
-      "sizes": "512x512",
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3249/3249935.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "sizes": "512x512"
     }
   ]
 }
