@@ -56,21 +56,22 @@ export const fetchDailyInspiration = async (dayInfo: {
     TASKS:
     1. LinkedIn Post (2000-2500 characters):
        - TONE: Spellbinding, humanized, and profoundly captivating.
-       - AUDIENCE: Global (professionals, beginners, young, old, leaders, followers).
-       - STYLE: Use diverse literary devices—metaphors, euphemisms, light sarcasm where appropriate, and calculated exaggeration to drive points home. Carry the reader along like a master storyteller. 
-       - CONSTRAINTS: NO unnecessary hyphens. Avoid robotic "AI-sounding" listicles. Use localized references from any relevant global location to add flavor, but keep the core message universal.
-       - THEME: Accurate historical context blended with modern leadership and life lessons.
+       - CONTENT: Blend the historical legacy of ${dayInfo.selectedEvent.title} with deep life reflections and a modern Christian perspective (faith, providence, resilience). Speak to everyone from beginners to veterans.
+       - STYLE: Use literary devices (metaphor, euphemism, sarcasm, exaggeration). NO unnecessary hyphens. Avoid robotic lists.
 
-    2. Bible Verse & Reference:
-       - CRITICAL: Select a verse that is DIRECTLY and INTIMATELY related to the themes of the historical event (e.g., if it's about a discovery, use a verse about light or hidden wisdom; if it's about a battle, use a verse about peace or courage).
+    2. Twitter/X Post (Max 260 characters):
+       - STYLE: Same depth as LinkedIn but punchy. Humanized, captivating, and carrying a Christian/life-wisdom heartbeat.
+    
+    3. Platform Hashtags:
+       - Provide "linkedInHashtags": 6-8 tags (leadership, life-lessons, faith, 2026-trends).
+       - Provide "twitterHashtags": 4-5 trending/high-reach tags for X.
 
-    3. Image Overlay Text:
-       - A very short, punchy summary (max 12 words) that captures the soul of the event. This will be the centerpiece of the visual.
+    4. Bible Verse & Reference: Select a verse INTIMATELY related to the historical themes.
 
-    4. Twitter/X Resonance: Concise (max 260 characters).
+    5. Image Overlay Text: Short, punchy summary (max 10 words) for the hero visual.
 
-    5. Image Prompt:
-       - Technical details for EXTREME photorealism. Specify: "Kodak Portra 400 feel", "sharp 85mm lens details", "natural cinematic lighting", "highly detailed skin/surface textures", "realistic shadows", "no distortions".
+    6. Image Prompt:
+       - Technical details for EXTREME photorealism (35mm f/1.4, cinematic natural light, sharp textures). Ensure NO TEXT in the image.
 
     Return as JSON:
     {
@@ -82,6 +83,8 @@ export const fetchDailyInspiration = async (dayInfo: {
       "reflectionPrompt": "...",
       "linkedInPost": "...",
       "twitterPost": "...",
+      "linkedInHashtags": "...",
+      "twitterHashtags": "...",
       "imagePrompt": "..."
     }
   `;
@@ -112,8 +115,7 @@ export const generateInspirationalImage = async (
   aspectRatio: "1:1" | "3:4" | "4:3" | "9:16" | "16:9" = "3:4"
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  // Emphasizing extreme realism to the image model
-  const prompt = `A masterwork of photography, hyper-realistic, 8k resolution. Subject: ${data.eventTitle}. Scene details: ${data.imagePrompt}. Lighting: Dramatic natural lighting, realistic atmosphere. Quality: National Geographic award-winning quality, sharp textures, perfectly realistic, no digital artifacts, NO TEXT on image.`;
+  const prompt = `A masterwork of photography, hyper-realistic, 8k. Subject: ${data.eventTitle}. Scene: ${data.imagePrompt}. Lighting: Dramatic cinematic natural light. Detail: Sharp textures, award-winning clarity, NO TEXT ON IMAGE.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',

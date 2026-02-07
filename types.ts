@@ -20,6 +20,8 @@ export interface InspirationData {
   reflectionPrompt: string;
   linkedInPost: string;
   twitterPost: string;
+  linkedInHashtags: string;
+  twitterHashtags: string;
   imagePrompt: string;
   imageUrl?: string;
   customBg?: string;
@@ -30,6 +32,7 @@ export interface InspirationData {
 export enum LoadingState {
   IDLE = 'IDLE',
   SETUP = 'SETUP',
+  SCANNING = 'SCANNING',
   CHOOSING_EVENT = 'CHOOSING_EVENT',
   FETCHING_EVENT = 'FETCHING_EVENT',
   GENERATING_IMAGE = 'GENERATING_IMAGE',

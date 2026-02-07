@@ -20,15 +20,17 @@ const getLocalDateString = () => {
 
 const ShimmerLoader: React.FC<{ text: string }> = ({ text }) => (
   <div className="flex flex-col items-center justify-center space-y-12 animate-in fade-in zoom-in-95 duration-1000">
-    <div className="relative w-40 h-40 flex items-center justify-center">
+    <div className="relative w-48 h-48 flex items-center justify-center">
       <div className="absolute inset-0 border-4 border-indigo-500/10 rounded-full"></div>
       <div className="absolute inset-0 border-4 border-t-indigo-600 rounded-full animate-spin"></div>
-      <div className="absolute inset-4 border-2 border-slate-200 dark:border-white/10 rounded-full animate-pulse-slow"></div>
-      <div className="absolute inset-8 border-2 border-indigo-500/20 rounded-full animate-pulse"></div>
-      <div className="w-4 h-4 bg-indigo-600 rounded-full shadow-[0_0_20px_rgba(79,70,229,0.8)] animate-float"></div>
+      <div className="absolute inset-6 border-2 border-slate-200 dark:border-white/10 rounded-full animate-pulse-slow"></div>
+      <div className="absolute inset-12 border-2 border-indigo-500/20 rounded-full animate-pulse"></div>
     </div>
-    <div className="space-y-4 text-center">
+    <div className="space-y-6 text-center w-full max-w-xs px-4">
       <h2 className="text-4xl font-serif italic text-slate-800 dark:text-slate-100 animate-pulse">{text}</h2>
+      <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+        <div className="h-full bg-indigo-600 animate-shimmer" style={{ width: '100%' }} />
+      </div>
       <p className="text-[11px] uppercase tracking-[0.6em] text-slate-400 font-black">Syncing with Temporal Archons...</p>
     </div>
   </div>
@@ -110,12 +112,15 @@ const MainApp: React.FC = () => {
   const handleFetchRecommendations = useCallback(async () => {
     try {
       setError(null);
-      setLoadingState(LoadingState.IDLE);
-      setTimeout(async () => {
-        setLoadingState(LoadingState.CHOOSING_EVENT);
-        const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 12);
+      setLoadingState(LoadingState.SCANNING);
+      
+      const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 12);
+      
+      // Artificial slight delay for smoothness
+      setTimeout(() => {
         setRecommendations(recs);
-      }, 150);
+        setLoadingState(LoadingState.CHOOSING_EVENT);
+      }, 800);
     } catch (err: any) {
       setError(err.message);
       setLoadingState(LoadingState.ERROR);
@@ -126,15 +131,20 @@ const MainApp: React.FC = () => {
     try {
       setError(null);
       setLoadingState(LoadingState.FETCHING_EVENT);
+      
       const info = await fetchDailyInspiration({ 
         current: dayInfo.current, total: dayInfo.total, formatted: dayInfo.formatted, 
         dateString: dayInfo.dateString, userName: authorName, selectedEvent: event
       });
+      
       setData(info);
       setLoadingState(LoadingState.GENERATING_IMAGE);
+      
       const imageUrl = await generateInspirationalImage(info, "3:4");
+      
       const completeData = { ...info, imageUrl };
       setData(completeData);
+      
       setLoadingState(LoadingState.COMPLETED);
     } catch (err: any) {
       setError(err.message || "Archive link severed.");
@@ -142,7 +152,7 @@ const MainApp: React.FC = () => {
     }
   }, [dayInfo, authorName]);
 
-  const isLoading = loadingState === LoadingState.FETCHING_EVENT || loadingState === LoadingState.GENERATING_IMAGE;
+  const isLoading = loadingState === LoadingState.SCANNING || loadingState === LoadingState.FETCHING_EVENT || loadingState === LoadingState.GENERATING_IMAGE;
 
   return (
     <div className="w-full flex flex-col items-center min-h-screen">
@@ -208,33 +218,28 @@ const MainApp: React.FC = () => {
       {loadingState === LoadingState.CHOOSING_EVENT && (
         <div className="max-w-6xl w-full my-auto space-y-16 animate-in fade-in zoom-in-90 slide-in-from-bottom-32 duration-1000 pb-32 pt-10 px-4">
           <div className="text-center space-y-8">
-            <h2 className="text-5xl sm:text-7xl font-serif font-bold text-slate-900 dark:text-white tracking-tighter">Archive Unveiled</h2>
+            <h2 className="text-5xl sm:text-7xl font-serif font-bold text-slate-900 dark:text-white tracking-tighter text-balance">Archive Unveiled</h2>
             <div className="flex flex-col items-center gap-4">
               <p className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-[0.8em] font-black">Select a Resonance Thread</p>
               <div className="w-24 h-1.5 bg-indigo-600/40 rounded-full" />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {recommendations.length > 0 ? recommendations.map((rec, idx) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10">
+            {recommendations.map((rec, idx) => (
               <button 
                 key={rec.id} 
                 onClick={() => handleSelectEvent(rec)} 
-                className="p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[4rem] text-left hover:border-indigo-600 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] transition-all group active:scale-[0.98] flex flex-col h-full shadow-xl relative overflow-hidden animate-in slide-in-from-bottom-20 fade-in fill-mode-both"
-                style={{ animationDelay: `${idx * 100}ms` }}
+                className="p-8 sm:p-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[3rem] sm:rounded-[4rem] text-left hover:border-indigo-600 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] transition-all group active:scale-[0.98] flex flex-col h-full shadow-xl relative overflow-hidden animate-in slide-in-from-bottom-20 fade-in fill-mode-both"
+                style={{ animationDelay: `${idx * 80}ms` }}
               >
                 <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-600/5 blur-[80px] pointer-events-none group-hover:bg-indigo-600/15 transition-colors" />
-                <div className="flex justify-between items-start mb-8">
+                <div className="flex justify-between items-start mb-6">
                   <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors leading-[1.1] pr-6">{rec.title}</h3>
-                  <span className="text-[12px] font-black bg-indigo-600 text-white px-4 py-1.5 rounded-full shadow-lg border border-white/10 shrink-0">{rec.year}</span>
+                  <span className="text-[11px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full shadow-lg shrink-0">{rec.year}</span>
                 </div>
-                <p className="text-base text-slate-500 dark:text-slate-400 font-serif italic leading-relaxed mt-auto line-clamp-4 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">{rec.description}</p>
+                <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-serif italic leading-relaxed mt-auto line-clamp-4 group-hover:text-slate-800 dark:group-hover:text-slate-200 transition-colors">{rec.description}</p>
               </button>
-            )) : (
-              <div className="col-span-full py-32 text-center space-y-6">
-                <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto shadow-xl" />
-                <p className="text-xs uppercase font-black tracking-[0.5em] text-slate-400 animate-pulse">Syncing Universal Stream...</p>
-              </div>
-            )}
+            ))}
           </div>
           <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-8 text-[11px] uppercase font-black text-slate-400 dark:text-white/10 hover:text-slate-900 dark:hover:text-white transition-all tracking-[0.8em] group">
             <span className="group-hover:tracking-[1em] transition-all">Reset Archival Link</span>
@@ -244,7 +249,9 @@ const MainApp: React.FC = () => {
 
       {isLoading && (
         <div className="my-auto pt-20">
-          <ShimmerLoader text={loadingState === LoadingState.FETCHING_EVENT ? 'Collating Wisdom' : 'Manifesting Vision'} />
+          <ShimmerLoader 
+            text={loadingState === LoadingState.SCANNING ? 'Scanning Archives' : loadingState === LoadingState.FETCHING_EVENT ? 'Collating Wisdom' : 'Manifesting Vision'} 
+          />
         </div>
       )}
 
@@ -263,15 +270,15 @@ const MainApp: React.FC = () => {
       )}
 
       {loadingState === LoadingState.ERROR && (
-        <div className="my-auto text-center p-16 bg-white dark:bg-slate-900 rounded-[4rem] border border-red-100 dark:border-red-500/20 max-w-lg shadow-3xl pt-20 mx-4 animate-in zoom-in-95 duration-500">
-          <div className="w-24 h-24 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
-             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="my-auto text-center p-10 sm:p-16 bg-white dark:bg-slate-900 rounded-[3rem] sm:rounded-[4rem] border border-red-100 dark:border-red-500/20 max-w-lg shadow-3xl pt-20 mx-4 animate-in zoom-in-95 duration-500">
+          <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-8">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
           <h2 className="text-3xl font-serif font-bold text-red-600 mb-6 tracking-tight">Sync Severed</h2>
-          <p className="text-base text-slate-500 dark:text-slate-400 mb-12 leading-relaxed">{error}</p>
-          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-7 bg-red-600 hover:bg-red-700 text-white rounded-[2.5rem] text-[12px] font-black uppercase tracking-[0.4em] transition-all shadow-2xl shadow-red-600/30 active:scale-95">Reconnect Systems</button>
+          <p className="text-base text-slate-500 dark:text-slate-400 mb-10 leading-relaxed">{error}</p>
+          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-6 bg-red-600 hover:bg-red-700 text-white rounded-[2rem] text-[12px] font-black uppercase tracking-[0.4em] transition-all shadow-2xl shadow-red-600/30">Reconnect Systems</button>
         </div>
       )}
     </div>
@@ -280,7 +287,7 @@ const MainApp: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen font-sans transition-colors duration-500">
+    <div className="min-h-screen font-sans transition-colors duration-500 overflow-x-hidden">
       <HashRouter>
         <Routes>
           <Route path="/" element={<MainApp />} />
