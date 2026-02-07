@@ -16,7 +16,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
   const hiddenCaptureRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [copiedType, setCopiedType] = useState<'li' | 'x' | null>(null);
+  const [copiedType, setCopiedType] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [scale, setScale] = useState(1);
@@ -41,7 +41,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
   }, [data.imageOverlayText, data.eventTitle]);
 
   const generateFullPost = (content: string, hashtags: string) => {
-    const header = `✨ DIVINE ECHO | ${data.dateString}\n📅 Day ${data.dayNumber} of ${data.totalDays}\n🌟 Moment: ${data.eventTitle}\n\n`;
+    const header = `✨ DIVINE ECHO | ${data.dateString}\n📅 Day ${data.dayNumber} of ${data.totalDays}\n\n`;
     return `${header}${content}\n\n${hashtags}`;
   };
 
@@ -57,7 +57,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
         height: 1350,
       });
       const link = document.createElement('a');
-      link.download = `DivineEcho-Day${data.dayNumber}-${data.dateString.replace(/\s+/g, '-')}.png`;
+      link.download = `DivineEcho-Day${data.dayNumber}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     } catch (err) {
@@ -67,11 +67,28 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
     }
   };
 
-  const handleListen = async () => {
+  const handleShare = async (platform: string, content: string, hashtags: string) => {
+    const fullText = generateFullPost(content, hashtags);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Divine Echo',
+          text: fullText,
+          url: window.location.href,
+        });
+      } catch (err) { console.debug('Share cancelled'); }
+    } else {
+      // Fallback: Copy to clipboard and alert
+      navigator.clipboard.writeText(fullText);
+      setCopiedType(platform);
+      setTimeout(() => setCopiedType(null), 2000);
+    }
+  };
+
+  const handleListenLinkedIn = async () => {
     if (isSpeaking) return;
     try {
       setIsSpeaking(true);
-      // Audio narration restricted to the LinkedIn post only
       const base64Audio = await generateTTS(data.linkedInPost);
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
       const binaryString = atob(base64Audio);
@@ -91,22 +108,12 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
     }
   };
 
-  const handleManualSave = () => {
-    if (onSave && !isSaved) {
-      onSave(data);
-      setIsSaved(true);
-      setTimeout(() => setIsSaved(false), 3000);
-    }
-  };
-
   const CardContent = ({ isCapture = false }: { isCapture?: boolean }) => (
     <div className="relative flex flex-col h-full w-full bg-slate-950 overflow-hidden" data-capture-node={isCapture ? "true" : "false"}>
       {(data.customBg || data.imageUrl) && (
         <img src={data.customBg || data.imageUrl} alt="" crossOrigin="anonymous" className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-100" />
       )}
-      
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/70 z-0 pointer-events-none" />
-      
       <div className="relative z-10 flex flex-col h-full p-16 items-center text-center">
         <div className="flex flex-col items-center w-full mb-10">
           <div className="flex items-center gap-4">
@@ -114,13 +121,11 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
              <span className="text-[14px] font-black uppercase tracking-[0.6em] text-white/80 drop-shadow-lg">{data.dateString}</span>
           </div>
         </div>
-
         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-5xl px-4">
           <h1 className={`${summaryFontSize} font-serif font-black text-white leading-[1.05] tracking-tight drop-shadow-[0_15px_60px_rgba(0,0,0,1)] italic scale-105 transition-transform`}>
             {data.imageOverlayText ? `“${data.imageOverlayText}”` : `“${data.eventTitle}”`}
           </h1>
         </div>
-
         <div className="w-full mt-auto pt-10">
           <div className="max-w-4xl mx-auto mb-12">
             <blockquote className="text-[26px] font-serif italic text-white leading-relaxed drop-shadow-[0_2px_15px_rgba(0,0,0,1)] px-12 mb-6">
@@ -128,7 +133,6 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
             </blockquote>
             <cite className="text-[15px] font-black uppercase tracking-[0.5em] text-white/70 not-italic drop-shadow-lg">{data.bibleReference}</cite>
           </div>
-          
           <div className="w-full flex justify-between items-end border-t border-white/10 pt-10">
             <div className="text-left">
               <p className="text-[10px] uppercase text-white/40 font-black tracking-widest mb-1">Archived for</p>
@@ -144,82 +148,95 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onDelete, onSav
   );
 
   return (
-    <div className="space-y-16 w-full max-w-4xl mx-auto py-10 px-4">
+    <div className="space-y-12 sm:space-y-16 w-full max-w-4xl mx-auto py-10 px-4">
+      {/* Hidden high-res capture node */}
       <div style={{ position: 'fixed', top: 0, left: '-5000px', width: '1080px', height: '1350px', zIndex: -9999, pointerEvents: 'none' }}>
         <div ref={hiddenCaptureRef} style={{ width: '1080px', height: '1350px' }}>
           <CardContent isCapture={true} />
         </div>
       </div>
 
+      {/* Hero Display Card */}
       <div ref={wrapperRef} className="w-full relative group cursor-pointer" style={{ height: `calc(${scale} * 1350px)` }}>
-        <div className="absolute top-0 left-0 overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 flex flex-col shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] group-hover:shadow-[0_60px_120px_-20px_rgba(0,0,0,0.6)] transition-all duration-700" style={{ width: '1080px', height: '1350px', transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: '70px' }}>
+        <div className="absolute top-0 left-0 overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 flex flex-col shadow-2xl transition-all duration-700" style={{ width: '1080px', height: '1350px', transform: `scale(${scale})`, transformOrigin: 'top left', borderRadius: '70px' }}>
           <CardContent />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-8 max-w-[900px] mx-auto">
-        <button onClick={handleListen} className={`py-5 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 transition-all ${isSpeaking ? 'animate-pulse text-indigo-600 border-indigo-200 shadow-md' : 'shadow-sm'}`}>{isSpeaking ? 'Narrating LinkedIn...' : 'Listen'}</button>
-        <button onClick={handleDownload} className="py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl shadow-indigo-600/30">Download</button>
-        <button onClick={handleManualSave} className={`py-5 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-[10px] border transition-all ${isSaved ? 'bg-green-600 text-white border-green-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/10 shadow-sm'}`}>
-          {isSaved ? '✓ Saved' : 'Archive'}
+      {/* Main Action Buttons */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-[900px] mx-auto">
+        <button onClick={handleListenLinkedIn} className={`py-4 px-6 rounded-3xl font-black uppercase tracking-wider text-[10px] bg-white dark:bg-slate-900 border dark:border-white/10 text-slate-600 dark:text-slate-300 ${isSpeaking ? 'animate-pulse text-indigo-500' : ''}`}>
+          {isSpeaking ? 'Narrating LI...' : 'Hear Wisdom'}
         </button>
-        <label className="flex items-center justify-center gap-2 py-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 rounded-[2.5rem] font-black uppercase tracking-[0.2em] text-[10px] cursor-pointer hover:bg-slate-50 dark:hover:bg-white/10 shadow-sm transition-all">
-          <input type="file" className="hidden" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if(file && onUpdate) { const reader = new FileReader(); reader.onload = () => onUpdate({ customBg: reader.result as string }); reader.readAsDataURL(file); } }} /> Scene Swap
+        <button onClick={handleDownload} className="py-4 px-6 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-wider text-[10px]">Download Frame</button>
+        <button onClick={() => { if(onSave) onSave(data); setIsSaved(true); setTimeout(() => setIsSaved(false), 2000); }} className={`py-4 px-6 rounded-3xl font-black uppercase tracking-wider text-[10px] border dark:border-white/10 ${isSaved ? 'bg-green-600 text-white' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300'}`}>
+          {isSaved ? 'Archived' : 'Pin to History'}
+        </button>
+        <label className="py-4 px-6 bg-white dark:bg-slate-900 border dark:border-white/10 text-slate-600 dark:text-slate-300 rounded-3xl font-black uppercase tracking-wider text-[10px] cursor-pointer text-center">
+          <input type="file" className="hidden" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if(file && onUpdate) { const reader = new FileReader(); reader.onload = () => onUpdate({ customBg: reader.result as string }); reader.readAsDataURL(file); } }} /> Swap Scene
         </label>
       </div>
 
-      <div className="space-y-12 max-w-[850px] mx-auto pb-20">
-        {/* LinkedIn Section */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-8 duration-700">
-          <div className="p-8 sm:p-12 bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 dark:border-white/10">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3 text-left">
-                <div className="h-3 w-3 bg-indigo-600 rounded-full" />
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-black uppercase tracking-[0.6em] text-indigo-600 dark:text-indigo-400">Master Narrative</span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-1 tracking-widest">LinkedIn Ready</span>
-                </div>
-              </div>
-              <button onClick={() => { navigator.clipboard.writeText(generateFullPost(data.linkedInPost, data.linkedInHashtags)); setCopiedType('li'); setTimeout(() => setCopiedType(null), 2000); }} className={`px-10 py-3.5 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-md ${copiedType === 'li' ? 'bg-green-600 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>
-                {copiedType === 'li' ? '✓ Copied' : 'Copy Narrative'}
-              </button>
+      {/* Narrative Hubs - Grouped by Platform */}
+      <div className="space-y-8 max-w-[850px] mx-auto">
+        
+        {/* Hub 1: Professional & Narrative (LinkedIn / Facebook / Wechat) */}
+        <div className="bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3rem] shadow-xl overflow-hidden">
+          <div className="p-8 border-b dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+            <div className="text-left">
+              <span className="text-[12px] font-black uppercase tracking-widest text-indigo-600">Narrative Hub</span>
+              <p className="text-[9px] uppercase text-slate-400 font-bold mt-1">LinkedIn • Facebook • Wechat</p>
             </div>
+            <button onClick={() => handleShare('Group1', data.linkedInPost, data.linkedInHashtags)} className="px-6 py-2 bg-indigo-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
+              {copiedType === 'Group1' ? 'Copied' : 'Share / Copy'}
+            </button>
           </div>
-          <div className="p-10 sm:p-14">
-            <div className="text-slate-700 dark:text-slate-300 leading-[1.8] whitespace-pre-wrap font-sans text-base sm:text-lg p-10 bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-inner">
+          <div className="p-10 text-left">
+            <div className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-sans text-sm sm:text-base p-8 bg-slate-50 dark:bg-white/5 rounded-3xl border dark:border-white/10 shadow-inner">
               {data.linkedInPost}
             </div>
-            <div className="mt-8 text-indigo-600 dark:text-indigo-400 font-bold text-sm text-left">
-              {data.linkedInHashtags}
-            </div>
+            <div className="mt-6 text-indigo-600 font-bold text-xs">{data.linkedInHashtags}</div>
           </div>
         </div>
 
-        {/* X Section */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-[3rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-8 duration-700 delay-150">
-          <div className="p-8 sm:p-12 bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 dark:border-white/10">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-3 text-left">
-                <div className="h-3 w-3 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-black uppercase tracking-[0.6em] text-blue-500">X Echo</span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-1 tracking-widest">Global Resonance</span>
-                </div>
-              </div>
-              <button onClick={() => { navigator.clipboard.writeText(generateFullPost(data.twitterPost, data.twitterHashtags)); setCopiedType('x'); setTimeout(() => setCopiedType(null), 2000); }} className={`px-10 py-3.5 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-md ${copiedType === 'x' ? 'bg-green-600 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'}`}>
-                {copiedType === 'x' ? '✓ Copied' : 'Copy Post'}
-              </button>
+        {/* Hub 2: Visual & Conversational (Instagram / Threads) */}
+        <div className="bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3rem] shadow-xl overflow-hidden">
+          <div className="p-8 border-b dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+            <div className="text-left">
+              <span className="text-[12px] font-black uppercase tracking-widest text-pink-500">Visual Caption</span>
+              <p className="text-[9px] uppercase text-slate-400 font-bold mt-1">Instagram • Threads</p>
             </div>
+            <button onClick={() => handleShare('Group2', data.instaThreadsPost, data.instaHashtags)} className="px-6 py-2 bg-pink-500 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
+              {copiedType === 'Group2' ? 'Copied' : 'Share / Copy'}
+            </button>
           </div>
-          <div className="p-10 sm:p-14">
-            <div className="text-slate-700 dark:text-slate-300 italic font-sans text-xl p-10 bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/10 shadow-inner leading-relaxed">
-              {data.twitterPost}
+          <div className="p-10 text-left">
+            <div className="text-slate-700 dark:text-slate-300 italic font-sans text-base p-8 bg-slate-50 dark:bg-white/5 rounded-3xl border dark:border-white/10 shadow-inner">
+              {data.instaThreadsPost}
             </div>
-            <div className="mt-8 text-blue-500 dark:text-blue-400 font-bold text-sm text-left">
-              {data.twitterHashtags}
-            </div>
+            <div className="mt-6 text-pink-500 font-bold text-xs">{data.instaHashtags}</div>
           </div>
         </div>
+
+        {/* Hub 3: Real-time & Viral (X / WhatsApp) */}
+        <div className="bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3rem] shadow-xl overflow-hidden">
+          <div className="p-8 border-b dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-white/5">
+            <div className="text-left">
+              <span className="text-[12px] font-black uppercase tracking-widest text-blue-400">Viral Echo</span>
+              <p className="text-[9px] uppercase text-slate-400 font-bold mt-1">X • WhatsApp</p>
+            </div>
+            <button onClick={() => handleShare('Group3', data.twitterWhatsAppPost, data.twitterHashtags)} className="px-6 py-2 bg-blue-400 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
+              {copiedType === 'Group3' ? 'Copied' : 'Share / Copy'}
+            </button>
+          </div>
+          <div className="p-10 text-left">
+            <div className="text-slate-700 dark:text-slate-300 font-sans text-lg p-8 bg-slate-50 dark:bg-white/5 rounded-3xl border dark:border-white/10 shadow-inner">
+              {data.twitterWhatsAppPost}
+            </div>
+            <div className="mt-6 text-blue-400 font-bold text-xs">{data.twitterHashtags}</div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

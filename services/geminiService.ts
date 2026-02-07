@@ -51,27 +51,30 @@ export const fetchDailyInspiration = async (dayInfo: {
 
   const prompt = `
     The year is 2026. Date: ${dayInfo.dateString}, 2026.
-    Selected Event: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year})
+    Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year})
 
     TASKS:
-    1. LinkedIn Post (2000-2500 characters):
-       - TONE: Spellbinding, humanized, and profoundly captivating.
-       - CONTENT: Blend the historical legacy of ${dayInfo.selectedEvent.title} with deep life reflections and a modern Christian perspective (faith, providence, resilience). Speak to everyone from beginners to veterans.
-       - STYLE: Use literary devices (metaphor, euphemism, sarcasm, exaggeration). NO unnecessary hyphens. Avoid robotic lists.
+    1. Narrative Group 1 (LinkedIn/Facebook/Wechat): 
+       - Long-form master storytelling (2000-2500 characters). 
+       - Humanized tone, blending historical legacy with deep life wisdom and a modern Christian perspective. 
+       - Use metaphors, sarcasm, and exaggeration to keep all audiences spellbound.
 
-    2. Twitter/X Post (Max 260 characters):
-       - STYLE: Same depth as LinkedIn but punchy. Humanized, captivating, and carrying a Christian/life-wisdom heartbeat.
-    
-    3. Platform Hashtags:
-       - Provide "linkedInHashtags": 6-8 tags (leadership, life-lessons, faith, 2026-trends).
-       - Provide "twitterHashtags": 4-5 trending/high-reach tags for X.
+    2. Narrative Group 2 (Instagram/Threads): 
+       - Visual-first caption (400-600 characters). 
+       - Punchy, aesthetic, emoji-rich, focusing on the "Vibe" of the visual and the spiritual takeaway.
 
-    4. Bible Verse & Reference: Select a verse INTIMATELY related to the historical themes.
+    3. Narrative Group 3 (X/WhatsApp): 
+       - Viral/Status style (Max 260 characters). 
+       - Provocative, concise, and high-resonance.
 
-    5. Image Overlay Text: Short, punchy summary (max 10 words) for the hero visual.
+    4. Hashtags: Provide specific trending hashtag strings for each group.
 
-    6. Image Prompt:
-       - Technical details for EXTREME photorealism (35mm f/1.4, cinematic natural light, sharp textures). Ensure NO TEXT in the image.
+    5. Bible Verse: Select a verse INTIMATELY related to the historical themes.
+
+    6. Image Overlay Text: Short, punchy summary (max 8 words) for the hero visual.
+
+    7. Image Prompt:
+       - Technical details for EXTREME photorealism (Kodak Portra, 35mm f/1.4 lens, cinematic natural light, sharp textures). NO TEXT in the image.
 
     Return as JSON:
     {
@@ -82,8 +85,10 @@ export const fetchDailyInspiration = async (dayInfo: {
       "bibleReference": "...",
       "reflectionPrompt": "...",
       "linkedInPost": "...",
-      "twitterPost": "...",
       "linkedInHashtags": "...",
+      "instaThreadsPost": "...",
+      "instaHashtags": "...",
+      "twitterWhatsAppPost": "...",
       "twitterHashtags": "...",
       "imagePrompt": "..."
     }

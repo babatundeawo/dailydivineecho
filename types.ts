@@ -18,10 +18,19 @@ export interface InspirationData {
   bibleVerse: string;
   bibleReference: string;
   reflectionPrompt: string;
-  linkedInPost: string;
-  twitterPost: string;
+  
+  // Platform Group 1: Professional & Community
+  linkedInPost: string; 
   linkedInHashtags: string;
+  
+  // Platform Group 2: Visual & Conversational
+  instaThreadsPost: string;
+  instaHashtags: string;
+
+  // Platform Group 3: Real-time & Viral
+  twitterWhatsAppPost: string;
   twitterHashtags: string;
+
   imagePrompt: string;
   imageUrl?: string;
   customBg?: string;
