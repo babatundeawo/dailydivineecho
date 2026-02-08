@@ -3,12 +3,25 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { getDayOfYearInfo } from './utils/dateUtils.ts';
 import { fetchDailyInspiration, generateInspirationalImage, fetchHistoricalRecommendations } from './services/geminiService.ts';
-import { InspirationData, LoadingState, HistoricalRecommendation } from './types.ts';
+import { InspirationData, LoadingState, HistoricalRecommendation, HistoricalEra, ImpactCategory } from './types.ts';
 import InspirationCard from './components/InspirationCard.tsx';
 
-const HISTORY_KEY = 'divine_echo_history_v2';
-const AUTHOR_KEY = 'divine_echo_author_name';
+const HISTORY_INDEX_KEY = 'divine_echo_index_v5';
+const HISTORY_ITEM_PREFIX = 'divine_echo_item_v5_';
+const AUTHOR_KEY = 'divine_echo_author_name_v5';
 const DEFAULT_AUTHOR = "Babátúndé Awóyẹmí";
+const MAX_HISTORY_ITEMS = 50;
+
+const ERAS: HistoricalEra[] = ['All', 'Ancient', 'Medieval', 'Renaissance', 'Industrial', 'Modern', 'Contemporary'];
+const CATEGORIES: ImpactCategory[] = ['All', 'Science', 'Arts', 'Politics', 'Religion', 'Discovery', 'Conflict'];
+
+interface HistoryMetadata {
+  id: string;
+  eventTitle: string;
+  dateString: string;
+  imageUrl?: string;
+  timestamp: number;
+}
 
 const getLocalDateString = () => {
   const now = new Date();
@@ -18,27 +31,100 @@ const getLocalDateString = () => {
   return `${year}-${month}-${day}`;
 };
 
-const ShimmerLoader: React.FC<{ text: string }> = ({ text }) => (
-  <div className="flex flex-col items-center justify-center space-y-12 animate-in fade-in zoom-in-95 duration-1000 p-8">
-    <div className="relative w-40 h-40 flex items-center justify-center">
-      <div className="absolute inset-0 border-4 border-indigo-500/10 rounded-full"></div>
-      <div className="absolute inset-0 border-4 border-t-indigo-600 rounded-full animate-spin"></div>
-      <div className="absolute inset-6 border-2 border-slate-200 dark:border-white/10 rounded-full animate-pulse-slow"></div>
-      <div className="absolute inset-12 border-2 border-indigo-500/20 rounded-full animate-pulse"></div>
-    </div>
-    <div className="space-y-6 text-center w-full max-w-sm">
-      <h2 className="text-3xl sm:text-4xl font-serif italic text-slate-800 dark:text-slate-100 animate-pulse">{text}</h2>
-      <div className="w-full h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
-        <div className="h-full bg-indigo-600 animate-shimmer" style={{ width: '100%' }} />
+const getSmartDefaults = (dateStr: string): { era: HistoricalEra, category: ImpactCategory } => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const dayOfWeek = new Date(year, month - 1, day).getDay();
+  
+  if (dayOfWeek === 0) return { era: 'Medieval', category: 'Religion' };
+  if (dayOfWeek === 1) return { era: 'Modern', category: 'Politics' };
+  if (dayOfWeek === 2) return { era: 'Industrial', category: 'Science' };
+  if (dayOfWeek === 3) return { era: 'Renaissance', category: 'Discovery' };
+  if (dayOfWeek === 4) return { era: 'Medieval', category: 'Conflict' };
+  if (dayOfWeek === 5) return { era: 'Contemporary', category: 'Arts' };
+  if (dayOfWeek === 6) return { era: 'Renaissance', category: 'Arts' };
+
+  return { era: 'All', category: 'All' };
+};
+
+const ShimmerLoader: React.FC<{ state: LoadingState }> = ({ state }) => {
+  const [progress, setProgress] = useState(0);
+  
+  const statusMessages = useMemo(() => {
+    switch (state) {
+      case LoadingState.SCANNING:
+        return ["Inverting timeline...", "Analyzing archival harmonics...", "Parsing historical ripples...", "Decoding resonance patterns..."];
+      case LoadingState.FETCHING_EVENT:
+        return ["Weaving narrative threads...", "Infusing spiritual wisdom...", "Engaging storytelling logic...", "Synthesizing enthusiasm..."];
+      case LoadingState.GENERATING_IMAGE:
+        return ["Rendering cinematic frames...", "Painting visual echoes...", "Calibrating lens harmonics...", "Finalizing manifestation..."];
+      default:
+        return ["Processing..."];
+    }
+  }, [state]);
+
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % statusMessages.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [statusMessages]);
+
+  useEffect(() => {
+    setProgress(0);
+    const interval = setInterval(() => {
+      setProgress(p => Math.min(p + (Math.random() * 15), 98));
+    }, 800);
+    return () => clearInterval(interval);
+  }, [state]);
+
+  return (
+    <div className="flex flex-col items-center justify-center space-y-12 animate-in fade-in zoom-in-95 duration-1000 p-8 min-h-[500px] w-full max-w-lg">
+      <div className="relative w-56 h-56 flex items-center justify-center">
+        <div className="absolute inset-0 border-[1px] border-indigo-500/10 rounded-full animate-[spin_10s_linear_infinite]">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-indigo-500 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.8)]" />
+        </div>
+        <div className="absolute inset-8 border-[1px] border-emerald-500/10 rounded-full animate-[spin_6s_linear_infinite_reverse]">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
+        </div>
+        <div className="absolute inset-16 border-4 border-t-indigo-600 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin shadow-[inset_0_0_20px_rgba(79,70,229,0.1)]"></div>
+        <div className="absolute inset-20 bg-gradient-to-br from-indigo-600/20 to-emerald-600/20 rounded-full blur-2xl animate-pulse"></div>
+        <div className="z-10 text-indigo-600 dark:text-indigo-400 font-black text-2xl tracking-tighter">
+          {Math.floor(progress)}%
+        </div>
       </div>
-      <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-black">Decrypting Temporal Nodes...</p>
+
+      <div className="space-y-6 text-center w-full">
+        <div className="h-10">
+          <h2 className="text-3xl font-serif italic text-slate-800 dark:text-slate-100 animate-in slide-in-from-bottom-2 fade-in duration-500 tracking-tight" key={statusMessages[messageIndex]}>
+            {statusMessages[messageIndex]}
+          </h2>
+        </div>
+        
+        <div className="w-full h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner">
+          <div 
+            className="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(79,70,229,0.5)]" 
+            style={{ width: `${progress}%` }} 
+          />
+        </div>
+        
+        <div className="flex justify-between items-center px-2">
+          <p className="text-[10px] uppercase tracking-[0.6em] text-slate-400 font-black animate-pulse">Archival Sync In Progress</p>
+          <div className="flex gap-1">
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+            <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const About: React.FC = () => (
   <div className="max-w-3xl w-full mx-auto py-12 px-6 animate-in slide-in-from-bottom-8 duration-700">
-    <div className="p-10 sm:p-16 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3rem] shadow-2xl relative overflow-hidden backdrop-blur-xl">
+    <div className="p-10 sm:p-16 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3.5rem] shadow-2xl relative overflow-hidden backdrop-blur-xl">
       <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] pointer-events-none" />
       <h1 className="text-4xl font-serif font-bold mb-8 text-slate-900 dark:text-white">The Echo Protocol</h1>
       <div className="space-y-6 text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -46,27 +132,10 @@ const About: React.FC = () => (
           <strong className="text-indigo-600 dark:text-indigo-400">Daily Divine Echo</strong> is a high-performance resonance engine built for the visionaries of 2026.
         </p>
         <p>
-          We bridge historical legacy with modern Christian wisdom, delivering spellbinding narratives that empower your digital presence across LinkedIn, Instagram, and X.
+          We bridge historical legacy with modern Christian wisdom, delivering spellbinding narratives that empower your digital presence.
         </p>
-        <div className="pt-8 border-t dark:border-white/5">
-          <h3 className="text-xs font-black uppercase tracking-[0.4em] text-slate-400 dark:text-white/30 mb-4">The Workflow</h3>
-          <ul className="space-y-4 text-sm">
-            <li className="flex gap-4">
-              <span className="text-indigo-600 font-bold">01</span>
-              <span>Target any temporal node on the calendar.</span>
-            </li>
-            <li className="flex gap-4">
-              <span className="text-indigo-600 font-bold">02</span>
-              <span>Select a resonance thread from the archives.</span>
-            </li>
-            <li className="flex gap-4">
-              <span className="text-indigo-600 font-bold">03</span>
-              <span>Deploy cinematic frames and viral narratives to your platforms.</span>
-            </li>
-          </ul>
-        </div>
       </div>
-      <Link to="/" className="inline-block mt-12 px-12 py-5 bg-indigo-600 text-white rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl">Back to interface</Link>
+      <Link to="/" className="inline-block mt-12 px-12 py-5 bg-indigo-600 text-white rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl hover:bg-indigo-700 transition-colors">Back to interface</Link>
     </div>
   </div>
 );
@@ -77,29 +146,79 @@ const MainApp: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [authorName, setAuthorName] = useState<string>(localStorage.getItem(AUTHOR_KEY) || DEFAULT_AUTHOR);
-  const [history, setHistory] = useState<InspirationData[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<HistoryMetadata[]>([]);
   const [recommendations, setRecommendations] = useState<HistoricalRecommendation[]>([]);
+  
+  const [eraFilter, setEraFilter] = useState<HistoricalEra>('All');
+  const [categoryFilter, setCategoryFilter] = useState<ImpactCategory>('All');
+  const [filtersManuallySet, setFiltersManuallySet] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(HISTORY_KEY);
-    if (saved) try { setHistory(JSON.parse(saved)); } catch (e) {}
+    const savedIndex = localStorage.getItem(HISTORY_INDEX_KEY);
+    if (savedIndex) try { setHistoryIndex(JSON.parse(savedIndex)); } catch (e) {}
   }, []);
+
+  useEffect(() => {
+    if (!filtersManuallySet) {
+      const { era, category } = getSmartDefaults(selectedDate);
+      setEraFilter(era);
+      setCategoryFilter(category);
+    }
+  }, [selectedDate, filtersManuallySet]);
 
   const saveToHistory = useCallback((newItem: InspirationData) => {
-    setHistory(prev => {
-      const idx = prev.findIndex(item => item.dateString === newItem.dateString && item.eventTitle === newItem.eventTitle);
-      const updated = idx !== -1 ? [...prev.slice(0, idx), newItem, ...prev.slice(idx + 1)] : [newItem, ...prev].slice(0, 30);
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-      return updated;
-    });
+    const itemId = `echo_${Date.now()}`;
+    const metadata: HistoryMetadata = {
+      id: itemId,
+      eventTitle: newItem.eventTitle,
+      dateString: newItem.dateString,
+      imageUrl: newItem.imageUrl,
+      timestamp: Date.now()
+    };
+
+    try {
+      // Store full content under a unique key
+      localStorage.setItem(`${HISTORY_ITEM_PREFIX}${itemId}`, JSON.stringify(newItem));
+      
+      // Update the lightweight index
+      const updatedIndex = [metadata, ...historyIndex].slice(0, MAX_HISTORY_ITEMS);
+      setHistoryIndex(updatedIndex);
+      localStorage.setItem(HISTORY_INDEX_KEY, JSON.stringify(updatedIndex));
+
+      // Synchronize physical storage - remove orphaned keys
+      const existingKeys = Object.keys(localStorage).filter(k => k.startsWith(HISTORY_ITEM_PREFIX));
+      const validKeys = updatedIndex.map(m => `${HISTORY_ITEM_PREFIX}${m.id}`);
+      existingKeys.forEach(k => {
+        if (!validKeys.includes(k)) localStorage.removeItem(k);
+      });
+
+    } catch (e) {
+      console.error("Archive storage failed:", e);
+      setError("Archive capacity reached. Please clear old echoes.");
+    }
+  }, [historyIndex]);
+
+  const loadFromHistory = useCallback((itemId: string) => {
+    const saved = localStorage.getItem(`${HISTORY_ITEM_PREFIX}${itemId}`);
+    if (saved) {
+      try {
+        setData(JSON.parse(saved));
+        setLoadingState(LoadingState.COMPLETED);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        console.error("Echo retrieval failed:", e);
+        setError("This archive fragment has been corrupted or lost.");
+      }
+    }
   }, []);
 
-  const deleteFromHistory = useCallback((e: React.MouseEvent, index: number) => {
+  const deleteFromHistory = useCallback((e: React.MouseEvent, itemId: string) => {
     e.stopPropagation();
-    const updated = history.filter((_, i) => i !== index);
-    setHistory(updated);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-  }, [history]);
+    const updatedIndex = historyIndex.filter(m => m.id !== itemId);
+    setHistoryIndex(updatedIndex);
+    localStorage.setItem(HISTORY_INDEX_KEY, JSON.stringify(updatedIndex));
+    localStorage.removeItem(`${HISTORY_ITEM_PREFIX}${itemId}`);
+  }, [historyIndex]);
 
   const dayInfo = useMemo(() => {
     const [year, month, day] = selectedDate.split('-').map(Number);
@@ -110,18 +229,18 @@ const MainApp: React.FC = () => {
     try {
       setError(null);
       setLoadingState(LoadingState.SCANNING);
-      const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 12);
+      const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 15, { era: eraFilter, category: categoryFilter });
       setTimeout(() => {
         setRecommendations(recs);
         setLoadingState(LoadingState.CHOOSING_EVENT);
-      }, 800);
+      }, 1000);
     } catch (err: any) {
       setError(err.message);
       setLoadingState(LoadingState.ERROR);
     }
-  }, [dayInfo]);
+  }, [dayInfo, eraFilter, categoryFilter]);
 
-  const handleSelectEvent = useCallback(async (event: HistoricalRecommendation) => {
+  const handleStartGeneration = useCallback(async (event: HistoricalRecommendation) => {
     try {
       setError(null);
       setLoadingState(LoadingState.FETCHING_EVENT);
@@ -144,48 +263,89 @@ const MainApp: React.FC = () => {
   const isLoading = loadingState === LoadingState.SCANNING || loadingState === LoadingState.FETCHING_EVENT || loadingState === LoadingState.GENERATING_IMAGE;
 
   return (
-    <div className="w-full flex flex-col items-center min-h-screen px-4 py-8">
+    <div className="w-full flex flex-col items-center min-h-screen px-4 py-8 max-w-7xl mx-auto overflow-hidden">
       {loadingState === LoadingState.SETUP && (
-        <div className="max-w-xl w-full my-auto space-y-10 animate-in slide-in-from-bottom-16 duration-1000">
-          <div className="p-8 sm:p-14 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[4rem] shadow-2xl relative overflow-hidden backdrop-blur-3xl">
+        <div className="max-w-2xl w-full my-auto space-y-12 animate-in slide-in-from-bottom-16 duration-1000">
+          <div className="p-8 sm:p-14 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3.5rem] shadow-2xl relative overflow-hidden backdrop-blur-3xl">
             <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 blur-[120px] pointer-events-none" />
             <div className="text-center">
               <h1 className="text-5xl font-serif font-bold tracking-tighter text-slate-900 dark:text-white">Divine Echo</h1>
-              <p className="text-[10px] text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.6em] mt-4 font-black">2026 Resonance Hub</p>
+              <p className="text-[10px] text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.6em] mt-4 font-black">2026 Resilience Hub</p>
               <div className="mt-10 inline-flex items-center px-6 py-2 bg-slate-50 dark:bg-white/5 border dark:border-white/10 rounded-full gap-4">
                 <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Day</span>
                 <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400">{dayInfo.current} <span className="text-slate-200 dark:text-white/10">/</span> {dayInfo.total}</span>
               </div>
             </div>
+            
             <div className="mt-12 space-y-8 text-left">
-              <div className="space-y-2">
-                <label className="text-[9px] text-slate-400 uppercase tracking-[0.4em] font-black ml-4">Observer</label>
-                <input type="text" value={authorName} onChange={(e) => { setAuthorName(e.target.value); localStorage.setItem(AUTHOR_KEY, e.target.value); }} className="w-full px-6 py-5 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-white" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] text-slate-400 uppercase tracking-[0.4em] font-black ml-4">Observer</label>
+                  <input type="text" value={authorName} onChange={(e) => { setAuthorName(e.target.value); localStorage.setItem(AUTHOR_KEY, e.target.value); }} className="w-full px-6 py-4 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-white font-medium" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] text-slate-400 uppercase tracking-[0.4em] font-black ml-4">Temporal Node</label>
+                  <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-6 py-4 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-white font-medium" />
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-[9px] text-slate-400 uppercase tracking-[0.4em] font-black ml-4">Date</label>
-                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-6 py-5 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/10 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-white" />
+
+              <div className="space-y-6 pt-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center ml-4">
+                    <label className="text-[9px] text-slate-400 uppercase tracking-[0.4em] font-black">Era Selection</label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {ERAS.map(e => (
+                      <button key={e} onClick={() => { setEraFilter(e); setFiltersManuallySet(true); }} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${eraFilter === e ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-50 dark:bg-white/5 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center ml-4">
+                    <label className="text-[9px] text-slate-400 uppercase tracking-[0.4em] font-black">Impact Category</label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {CATEGORIES.map(c => (
+                      <button key={c} onClick={() => { setCategoryFilter(c); setFiltersManuallySet(true); }} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${categoryFilter === c ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-50 dark:bg-white/5 text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'}`}>
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <button onClick={handleFetchRecommendations} className="w-full py-6 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-indigo-600/40">Scan Archives</button>
+
+              <button onClick={handleFetchRecommendations} className="w-full py-7 bg-indigo-600 text-white rounded-3xl font-black uppercase tracking-widest text-[12px] shadow-2xl shadow-indigo-600/40 hover:bg-indigo-700 transition-all active:scale-95">Scan Archival Channels</button>
             </div>
             <Link to="/about" className="block mt-10 text-[9px] uppercase font-black tracking-[0.5em] text-slate-300 hover:text-indigo-600 transition-all text-center">Manifesto</Link>
           </div>
 
-          {/* History Scroll - Mobile First */}
-          {history.length > 0 && (
-            <div className="space-y-6">
-              <h3 className="text-center text-[10px] uppercase font-black tracking-widest text-slate-400">Archived Echoes</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {history.map((item, idx) => (
-                  <button key={idx} onClick={() => { setData(item); setLoadingState(LoadingState.COMPLETED); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-3xl text-left shadow-lg overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="w-12 h-12 rounded-2xl overflow-hidden border dark:border-white/5 shrink-0">
-                      {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold truncate text-slate-900 dark:text-white">{item.eventTitle}</p>
-                      <p className="text-[9px] text-slate-400 uppercase font-black">{item.dateString}</p>
-                    </div>
-                  </button>
+          {historyIndex.length > 0 && (
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300">
+              <div className="flex items-center justify-center gap-4">
+                <div className="h-px bg-slate-200 dark:bg-white/10 flex-1 max-w-[100px]" />
+                <h3 className="text-[10px] uppercase font-black tracking-[1em] text-slate-400 text-center">Personal Echoes</h3>
+                <div className="h-px bg-slate-200 dark:bg-white/10 flex-1 max-w-[100px]" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4">
+                {historyIndex.map((item, idx) => (
+                  <div key={item.id} className="group relative flex items-center gap-5 p-5 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[2.5rem] hover:border-indigo-500/40 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-left shadow-lg overflow-hidden animate-in fade-in slide-in-from-right-12" style={{ animationDelay: `${idx * 100}ms` }}>
+                    <button onClick={() => loadFromHistory(item.id)} className="flex-1 flex items-center gap-5 min-w-0">
+                      <div className="w-16 h-16 rounded-3xl overflow-hidden border dark:border-white/5 shadow-md bg-slate-100 dark:bg-slate-800 shrink-0">
+                        {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate text-slate-900 dark:text-white">{item.eventTitle}</p>
+                        <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest">{item.dateString}</p>
+                      </div>
+                    </button>
+                    <button onClick={(e) => deleteFromHistory(e, item.id)} className="p-3 text-slate-200 dark:text-slate-800 hover:text-red-500 transition-all rounded-full hover:bg-red-50">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -194,44 +354,54 @@ const MainApp: React.FC = () => {
       )}
 
       {loadingState === LoadingState.CHOOSING_EVENT && (
-        <div className="max-w-6xl w-full space-y-16 animate-in fade-in zoom-in-95 duration-700 pb-20">
+        <div className="max-w-6xl w-full space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-700 pb-20 mt-10">
           <div className="text-center space-y-4">
-            <h2 className="text-5xl font-serif font-bold text-slate-900 dark:text-white">The Archives</h2>
-            <p className="text-[10px] text-slate-400 uppercase tracking-[0.8em] font-black">Select a Resonance Thread</p>
+            <h2 className="text-5xl font-serif font-bold text-slate-900 dark:text-white tracking-tight">Select Resonance</h2>
+            <div className="flex items-center justify-center gap-4 text-[10px] text-slate-400 uppercase tracking-[0.6em] font-black">
+              <span>{recommendations.length} Archived Fragments</span>
+              <span className="text-indigo-500">Filtered for {eraFilter} {categoryFilter}</span>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {recommendations.map((rec, idx) => (
-              <button key={rec.id} onClick={() => handleSelectEvent(rec)} className="p-8 sm:p-12 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3rem] text-left hover:border-indigo-600 transition-all group active:scale-[0.98] shadow-xl relative overflow-hidden animate-in slide-in-from-bottom-10 fade-in" style={{ animationDelay: `${idx * 80}ms` }}>
-                <div className="flex justify-between items-start mb-6">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors leading-[1.1] pr-6">{rec.title}</h3>
-                  <span className="text-[10px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full shrink-0">{rec.year}</span>
+              <button key={rec.id} onClick={() => handleStartGeneration(rec)} className="p-10 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[3.5rem] text-left hover:border-indigo-600 hover:shadow-2xl transition-all group active:scale-[0.98] shadow-xl relative overflow-hidden animate-in slide-in-from-bottom-12 fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
+                <div className="flex justify-between items-start mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors leading-[1.2] pr-6">{rec.title}</h3>
+                  <span className="text-[11px] font-black bg-indigo-600 text-white px-4 py-1.5 rounded-full shrink-0 shadow-lg">{rec.year}</span>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-serif italic line-clamp-3">{rec.description}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-serif italic line-clamp-3 leading-relaxed border-t dark:border-white/5 pt-6">{rec.description}</p>
               </button>
             ))}
           </div>
-          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-8 text-[9px] uppercase font-black text-slate-300 hover:text-white tracking-[0.5em] transition-all">Back to scanner</button>
+          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-8 text-[9px] uppercase font-black text-slate-400 hover:text-indigo-600 tracking-[0.8em] transition-all">Back to scanner config</button>
         </div>
       )}
 
       {isLoading && (
         <div className="my-auto">
-          <ShimmerLoader text={loadingState === LoadingState.SCANNING ? 'Scanning Archives' : loadingState === LoadingState.FETCHING_EVENT ? 'Collating Wisdom' : 'Manifesting Vision'} />
+          <ShimmerLoader state={loadingState} />
         </div>
       )}
 
       {data && loadingState === LoadingState.COMPLETED && (
-        <div className="w-full max-w-5xl animate-in fade-in duration-1000 pb-20">
+        <div className="w-full max-w-5xl animate-in fade-in slide-in-from-bottom-12 duration-1000 pb-20 mt-10">
           <InspirationCard data={data} showControls={true} onUpdate={(u) => setData(prev => prev ? {...prev, ...u} : null)} onSave={() => saveToHistory(data)} />
-          <button onClick={() => { setData(null); setLoadingState(LoadingState.SETUP); }} className="mt-10 px-10 py-5 bg-white dark:bg-slate-900 border dark:border-white/10 text-slate-400 rounded-full text-[10px] uppercase font-black tracking-widest shadow-md">New Scan</button>
+          <div className="flex justify-center mt-16">
+            <button onClick={() => { setData(null); setLoadingState(LoadingState.SETUP); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="px-16 py-7 bg-white dark:bg-slate-900 border dark:border-white/10 text-slate-500 dark:text-slate-400 rounded-full text-[11px] uppercase font-black tracking-[0.5em] shadow-2xl hover:text-indigo-600 transition-all active:scale-95">Return to Archive Core</button>
+          </div>
         </div>
       )}
 
       {loadingState === LoadingState.ERROR && (
-        <div className="my-auto text-center p-12 bg-white dark:bg-slate-900 rounded-[3rem] border border-red-100 max-w-lg shadow-3xl">
-          <h2 className="text-3xl font-serif font-bold text-red-600 mb-6">Sync Severed</h2>
-          <p className="text-base text-slate-500 mb-10">{error}</p>
-          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-6 bg-red-600 text-white rounded-3xl text-[11px] font-black uppercase tracking-widest">Reconnect Systems</button>
+        <div className="my-auto text-center p-14 bg-white dark:bg-slate-900 rounded-[4rem] border border-red-100 dark:border-red-900/30 max-w-lg shadow-[0_30px_100px_rgba(239,68,68,0.1)] animate-in zoom-in-95">
+          <div className="w-24 h-24 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-10 animate-bounce">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-4xl font-serif font-bold text-red-600 mb-8">System Instability</h2>
+          <p className="text-lg text-slate-500 dark:text-slate-400 mb-12 leading-relaxed font-medium">{error}</p>
+          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-7 bg-red-600 text-white rounded-[2rem] text-[12px] font-black uppercase tracking-widest shadow-2xl shadow-red-600/30 active:scale-95 transition-all">Attempt Reconnection</button>
         </div>
       )}
     </div>
@@ -240,7 +410,7 @@ const MainApp: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen font-sans transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-screen font-sans transition-colors duration-500 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
       <HashRouter>
         <Routes>
           <Route path="/" element={<MainApp />} />

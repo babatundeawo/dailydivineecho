@@ -4,7 +4,12 @@ export interface HistoricalRecommendation {
   title: string;
   description: string;
   year: string;
+  category?: string;
+  era?: string;
 }
+
+export type HistoricalEra = 'Ancient' | 'Medieval' | 'Renaissance' | 'Industrial' | 'Modern' | 'Contemporary' | 'All';
+export type ImpactCategory = 'Science' | 'Arts' | 'Politics' | 'Religion' | 'Discovery' | 'Conflict' | 'All';
 
 export interface InspirationData {
   dayCount: string;
@@ -19,17 +24,23 @@ export interface InspirationData {
   bibleReference: string;
   reflectionPrompt: string;
   
-  // Platform Group 1: Professional & Community
-  linkedInPost: string; 
-  linkedInHashtags: string;
-  
-  // Platform Group 2: Visual & Conversational
-  instaThreadsPost: string;
-  instaHashtags: string;
+  // Dedicated Platform Posts
+  linkedInPost: string;
+  facebookPost: string;
+  wechatPost: string;
+  instagramPost: string;
+  threadsPost: string;
+  twitterPost: string;
+  whatsappPost: string;
 
-  // Platform Group 3: Real-time & Viral
-  twitterWhatsAppPost: string;
+  // Dedicated Platform Hashtags
+  linkedInHashtags: string;
+  facebookHashtags: string;
+  wechatHashtags: string;
+  instagramHashtags: string;
+  threadsHashtags: string;
   twitterHashtags: string;
+  whatsappHashtags: string;
 
   imagePrompt: string;
   imageUrl?: string;

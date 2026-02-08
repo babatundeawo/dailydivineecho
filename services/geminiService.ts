@@ -1,27 +1,31 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { InspirationData, HistoricalRecommendation } from "../types";
+import { InspirationData, HistoricalRecommendation, HistoricalEra, ImpactCategory } from "../types";
 
 const API_KEY = process.env.API_KEY || "";
 
 export const fetchHistoricalRecommendations = async (
   dateString: string, 
   count: number = 10,
-  excludeTitles: string[] = []
+  filter: { era: HistoricalEra, category: ImpactCategory } = { era: 'All', category: 'All' }
 ): Promise<HistoricalRecommendation[]> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
-  const exclusionContext = excludeTitles.length > 0 
-    ? `\nDO NOT include these events: ${excludeTitles.join(', ')}.` 
-    : '';
+  const filterContext = `
+    Era Filter: ${filter.era !== 'All' ? filter.era : 'Any historical era'}
+    Category Filter: ${filter.category !== 'All' ? filter.category : 'Any impact category'}
+  `;
 
   const prompt = `
-    Find exactly ${count} highly significant historical or world-changing events that happened on ${dateString} throughout history.${exclusionContext}
+    Find exactly ${count} highly significant historical or world-changing events that happened on ${dateString} throughout history.
+    ${filterContext}
     Return them as a JSON array of objects with:
     - id: a unique short string
     - title: max 5 words
-    - description: max 12 words
+    - description: max 25 words (make it humanly intriguing and slightly dramatic)
     - year: the year it happened
+    - era: the era it belongs to
+    - category: the category of impact
     
     Focus on monumental global shifts or discoveries with universal resonance.
   `;
@@ -51,30 +55,29 @@ export const fetchDailyInspiration = async (dayInfo: {
 
   const prompt = `
     The year is 2026. Date: ${dayInfo.dateString}, 2026.
-    Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year})
+    Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year}) - ${dayInfo.selectedEvent.description}
 
-    TASKS:
-    1. Narrative Group 1 (LinkedIn/Facebook/Wechat): 
-       - Long-form master storytelling (2000-2500 characters). 
-       - Humanized tone, blending historical legacy with deep life wisdom and a modern Christian perspective. 
-       - Use metaphors, sarcasm, and exaggeration to keep all audiences spellbound.
+    GENERATE SEVEN DISTINCT NARRATIVE VERSIONS:
+    CORE PHILOSOPHY:
+    - Spiritual Undertone: Every post must weave in a spiritual truth or perspective derived from Christian scriptures.
+    - Tone: Humanly enthusiastic, witty, and profoundly engaging. Use human euphemisms, light sarcasm, and vivid metaphors. 
+    - NO ROBOTIC PHRASING: Avoid words like "delve", "tapestry", "embark", "testament", "realm", "beacon", or "unfold". Speak like a brilliant, slightly caffeinated visionary who is obsessed with history and God's providence.
+    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (e.g., use "long term" instead of "long-term", "heart felt" instead of "heart-felt"). If a word requires a hyphen, find a better word or use a space. This is strict.
+    - Natural Conversational Flow: The transition from history to scripture must feel like a "eureka" moment, not a forced lesson.
 
-    2. Narrative Group 2 (Instagram/Threads): 
-       - Visual-first caption (400-600 characters). 
-       - Punchy, aesthetic, emoji-rich, focusing on the "Vibe" of the visual and the spiritual takeaway.
+    STRICT CHARACTER LIMITS (INCLUDE HASHTAGS IN COUNT):
+    1. LinkedIn: < 3000 chars. (Professional brilliance meets spiritual depth)
+    2. Facebook: < 3000 chars. (Community connection with a human soul)
+    3. WeChat: < 5000 chars. (In-depth thought leadership with a spiritual heartbeat)
+    4. Instagram: < 2200 chars. (Visual storytelling style. MAX 5 hashtags)
+    5. Threads: < 500 chars. (Punchy, fast paced insight)
+    6. X (Twitter): < 280 chars. (Provocative and viral spiritual resonance)
+    7. WhatsApp: < 500 chars. (Relatable, personal status style wisdom)
 
-    3. Narrative Group 3 (X/WhatsApp): 
-       - Viral/Status style (Max 260 characters). 
-       - Provocative, concise, and high-resonance.
-
-    4. Hashtags: Provide specific trending hashtag strings for each group.
-
-    5. Bible Verse: Select a verse INTIMATELY related to the historical themes.
-
-    6. Image Overlay Text: Short, punchy summary (max 8 words) for the hero visual.
-
-    7. Image Prompt:
-       - Technical details for EXTREME photorealism (Kodak Portra, 35mm f/1.4 lens, cinematic natural light, sharp textures). NO TEXT in the image.
+    REQUIREMENTS:
+    - Bible Verse: Select one INTIMATELY related to the historical themes.
+    - Image Overlay Text: Max 8 words. No hyphens.
+    - Image Prompt: Technical photorealistic details (35mm, cinematic). NO TEXT on the image itself.
 
     Return as JSON:
     {
@@ -84,12 +87,13 @@ export const fetchDailyInspiration = async (dayInfo: {
       "bibleVerse": "...",
       "bibleReference": "...",
       "reflectionPrompt": "...",
-      "linkedInPost": "...",
-      "linkedInHashtags": "...",
-      "instaThreadsPost": "...",
-      "instaHashtags": "...",
-      "twitterWhatsAppPost": "...",
-      "twitterHashtags": "...",
+      "linkedInPost": "...", "linkedInHashtags": "...",
+      "facebookPost": "...", "facebookHashtags": "...",
+      "wechatPost": "...", "wechatHashtags": "...",
+      "instagramPost": "...", "instagramHashtags": "...",
+      "threadsPost": "...", "threadsHashtags": "...",
+      "twitterPost": "...", "twitterHashtags": "...",
+      "whatsappPost": "...", "whatsappHashtags": "...",
       "imagePrompt": "..."
     }
   `;
@@ -120,7 +124,7 @@ export const generateInspirationalImage = async (
   aspectRatio: "1:1" | "3:4" | "4:3" | "9:16" | "16:9" = "3:4"
 ): Promise<string> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
-  const prompt = `A masterwork of photography, hyper-realistic, 8k. Subject: ${data.eventTitle}. Scene: ${data.imagePrompt}. Lighting: Dramatic cinematic natural light. Detail: Sharp textures, award-winning clarity, NO TEXT ON IMAGE.`;
+  const prompt = `A masterwork of photography, hyper-realistic, 8k. Subject: ${data.eventTitle}. Scene: ${data.imagePrompt}. Lighting: Dramatic cinematic natural light. Detail: Sharp textures, NO TEXT ON IMAGE.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
