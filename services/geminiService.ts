@@ -11,23 +11,16 @@ export const fetchHistoricalRecommendations = async (
 ): Promise<HistoricalRecommendation[]> => {
   const ai = new GoogleGenAI({ apiKey: API_KEY });
 
-  const filterContext = `
-    Era Filter: ${filter.era !== 'All' ? filter.era : 'Any historical era'}
-    Category Filter: ${filter.category !== 'All' ? filter.category : 'Any impact category'}
-  `;
-
   const prompt = `
-    Find exactly ${count} highly significant historical or world-changing events that happened on ${dateString} throughout history.
-    ${filterContext}
+    Find exactly ${count} highly significant, intriguing, and world-changing events that happened on ${dateString} throughout history.
+    Prioritize events with profound spiritual, scientific, or cultural resonance.
     Return them as a JSON array of objects with:
     - id: a unique short string
     - title: max 5 words
-    - description: max 25 words (make it humanly intriguing and slightly dramatic)
+    - description: max 25 words (make it humanly intriguing)
     - year: the year it happened
     - era: the era it belongs to
     - category: the category of impact
-    
-    Focus on monumental global shifts or discoveries with universal resonance.
   `;
 
   const response = await ai.models.generateContent({
@@ -57,27 +50,30 @@ export const fetchDailyInspiration = async (dayInfo: {
     The year is 2026. Date: ${dayInfo.dateString}, 2026.
     Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year}) - ${dayInfo.selectedEvent.description}
 
-    GENERATE SEVEN DISTINCT NARRATIVE VERSIONS:
-    CORE PHILOSOPHY:
-    - Spiritual Undertone: Every post must weave in a spiritual truth or perspective derived from Christian scriptures.
-    - Tone: Humanly enthusiastic, witty, and profoundly engaging. Use human euphemisms, light sarcasm, and vivid metaphors. 
-    - NO ROBOTIC PHRASING: Avoid words like "delve", "tapestry", "embark", "testament", "realm", "beacon", or "unfold". Speak like a brilliant, slightly caffeinated visionary who is obsessed with history and God's providence.
-    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (e.g., use "long term" instead of "long-term", "heart felt" instead of "heart-felt"). If a word requires a hyphen, find a better word or use a space. This is strict.
-    - Natural Conversational Flow: The transition from history to scripture must feel like a "eureka" moment, not a forced lesson.
+    WRITEUP STRUCTURE (THE RESONANCE ARC):
+    Every post must follow this 3-stage flow:
+    1. THE SPARK: Retell the historical event with high energy and vivid metaphors.
+    2. THE PIVOT: A natural "eureka" transition to modern life.
+    3. THE LIGHT: A spiritual insight grounded in a specific Bible verse.
 
-    STRICT CHARACTER LIMITS (INCLUDE HASHTAGS IN COUNT):
-    1. LinkedIn: < 3000 chars. (Professional brilliance meets spiritual depth)
-    2. Facebook: < 3000 chars. (Community connection with a human soul)
-    3. WeChat: < 5000 chars. (In-depth thought leadership with a spiritual heartbeat)
-    4. Instagram: < 2200 chars. (Visual storytelling style. MAX 5 hashtags)
-    5. Threads: < 500 chars. (Punchy, fast paced insight)
-    6. X (Twitter): < 280 chars. (Provocative and viral spiritual resonance)
-    7. WhatsApp: < 500 chars. (Relatable, personal status style wisdom)
+    CORE PHILOSOPHY:
+    - Tone: Humanly enthusiastic, witty, and caffeinated.
+    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (e.g. "long term" not "long-term").
+    - NO AI CLICHES: No "tapestry", "delve", "beacon", "testament", etc.
+
+    STRICT PLATFORM CONSTRAINTS (EXACT CHARACTER LIMITS):
+    1. LinkedIn: Target exactly 3000 chars. (Professional brilliance)
+    2. Facebook: Target exactly 3000 chars. (Community soul)
+    3. WeChat: Target exactly 5000 chars. (In depth thought leadership)
+    4. Instagram: Max 2200 chars. Include exactly 5 hashtags.
+    5. Threads: Max 500 chars.
+    6. X (Twitter): Max 280 chars. (Provocative and punchy)
+    7. WhatsApp: Max 500 chars. (Relatable status wisdom)
 
     REQUIREMENTS:
-    - Bible Verse: Select one INTIMATELY related to the historical themes.
+    - Bible Verse: Select one INTIMATELY related.
     - Image Overlay Text: Max 8 words. No hyphens.
-    - Image Prompt: Technical photorealistic details (35mm, cinematic). NO TEXT on the image itself.
+    - Image Prompt: Technical photorealistic details (35mm, cinematic). No text on image.
 
     Return as JSON:
     {

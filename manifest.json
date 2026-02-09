@@ -1,16 +1,39 @@
 {
   "short_name": "DivineEcho",
   "name": "Divine Echo",
+  "description": "Resonance for the Modern Leader. A high-performance personal growth engine blending historical insight, generative AI, and cinematic storytelling.",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#020617",
+  "orientation": "portrait",
+  "theme_color": "#0f172a",
   "background_color": "#020617",
-  "description": "Resonance for the Modern Leader. A high-performance personal growth engine blending historical insight, generative AI, and cinematic storytelling.",
+  "categories": ["productivity", "education", "lifestyle"],
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
