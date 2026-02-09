@@ -6,10 +6,10 @@ import { fetchDailyInspiration, generateInspirationalImage, fetchHistoricalRecom
 import { InspirationData, LoadingState, HistoricalRecommendation } from './types.ts';
 import InspirationCard from './components/InspirationCard.tsx';
 
-const HISTORY_INDEX_KEY = 'divine_echo_index_v6';
-const HISTORY_ITEM_PREFIX = 'divine_echo_item_v6_';
-const AUTHOR_KEY = 'divine_echo_author_name_v6';
-const DEFAULT_AUTHOR = "Awaiting Soul";
+const HISTORY_INDEX_KEY = 'divine_echo_index_v7';
+const HISTORY_ITEM_PREFIX = 'divine_echo_item_v7_';
+const AUTHOR_KEY = 'divine_echo_author_name_v7';
+const DEFAULT_AUTHOR = "Awaiting Witness";
 const MAX_HISTORY_ITEMS = 50;
 
 interface HistoryMetadata {
@@ -30,66 +30,45 @@ const getLocalDateString = () => {
 
 const ShimmerLoader: React.FC<{ state: LoadingState }> = ({ state }) => {
   const [progress, setProgress] = useState(0);
-  
   const statusMessages = useMemo(() => {
     switch (state) {
       case LoadingState.SCANNING:
-        return ["Scanning archival depths...", "Calibrating spiritual resonance...", "Finding the most intriguing node...", "Decoding historical ripples..."];
+        return ["Piercing archival depths...", "Finding intrigued nodes...", "Parsing temporal ripples...", "Decoding ancient harmonics..."];
       case LoadingState.FETCHING_EVENT:
-        return ["Weaving your master narrative...", "Infusing witty enthusiasm...", "Applying zero-hyphen logic...", "Grounding in ancient wisdom..."];
+        return ["Weaving a master narrative...", "Infusing witty energy...", "Applying zero-hyphen logic...", "Synthesizing deep wisdom..."];
       case LoadingState.GENERATING_IMAGE:
-        return ["Painting visual echoes...", "Developing cinematic light...", "Capturing historical aura...", "Manifesting visual truth..."];
+        return ["Painting visual echoes...", "Calibrating cinematic light...", "Capturing aura...", "Developing art..."];
       default:
-        return ["Calibrating..."];
+        return ["Connecting..."];
     }
   }, [state]);
 
   const [messageIndex, setMessageIndex] = useState(0);
-
   useEffect(() => {
-    const timer = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % statusMessages.length);
-    }, 2800);
+    const timer = setInterval(() => setMessageIndex((prev) => (prev + 1) % statusMessages.length), 3000);
     return () => clearInterval(timer);
   }, [statusMessages]);
 
   useEffect(() => {
     setProgress(0);
-    const interval = setInterval(() => {
-      setProgress(p => Math.min(p + (Math.random() * 10), 99));
-    }, 1000);
+    const interval = setInterval(() => setProgress(p => Math.min(p + (Math.random() * 8), 99)), 800);
     return () => clearInterval(interval);
   }, [state]);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-16 animate-in fade-in zoom-in-95 duration-1000 p-8 min-h-[600px] w-full max-w-xl">
-      <div className="relative w-64 h-64 flex items-center justify-center">
-        <div className="absolute inset-0 border-[2px] border-indigo-500/10 rounded-full animate-[spin_12s_linear_infinite]">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-indigo-500 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.8)]" />
-        </div>
-        <div className="absolute inset-10 border-[1px] border-emerald-500/10 rounded-full animate-[spin_8s_linear_infinite_reverse]">
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
-        </div>
-        <div className="absolute inset-20 bg-gradient-to-br from-indigo-600/10 to-emerald-600/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="z-10 flex flex-col items-center">
-          <span className="text-4xl font-black text-indigo-600 dark:text-indigo-400 tracking-tighter">{Math.floor(progress)}%</span>
-        </div>
+    <div className="flex flex-col items-center justify-center space-y-12 animate-in fade-in zoom-in-95 duration-1000 p-8 min-h-[500px] w-full max-w-lg">
+      <div className="relative w-48 h-48 flex items-center justify-center">
+        <div className="absolute inset-0 border-[2px] border-indigo-500/10 rounded-full animate-[spin_10s_linear_infinite]" />
+        <div className="absolute inset-4 border-[1px] border-emerald-500/10 rounded-full animate-[spin_6s_linear_infinite_reverse]" />
+        <div className="z-10 text-4xl font-black text-indigo-600 dark:text-indigo-400">{Math.floor(progress)}%</div>
       </div>
-
-      <div className="space-y-8 text-center w-full">
-        <div className="h-12 overflow-hidden">
-          <h2 className="text-3xl font-serif italic text-slate-800 dark:text-slate-100 animate-in slide-in-from-bottom-2 fade-in duration-700 tracking-tight" key={statusMessages[messageIndex]}>
-            {statusMessages[messageIndex]}
-          </h2>
+      <div className="space-y-6 text-center w-full">
+        <h2 className="text-2xl font-serif italic text-slate-800 dark:text-slate-100 transition-all duration-700" key={messageIndex}>
+          {statusMessages[messageIndex]}
+        </h2>
+        <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-1000 ease-out" style={{ width: `${progress}%` }} />
         </div>
-        
-        <div className="w-full h-1 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden shadow-inner max-w-xs mx-auto">
-          <div 
-            className="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-1000 ease-out" 
-            style={{ width: `${progress}%` }} 
-          />
-        </div>
-        <p className="text-[11px] uppercase tracking-[1em] text-slate-400 font-black animate-pulse ml-2">Archival Synchronization</p>
       </div>
     </div>
   );
@@ -101,6 +80,7 @@ const MainApp: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [authorName, setAuthorName] = useState<string>(localStorage.getItem(AUTHOR_KEY) || DEFAULT_AUTHOR);
+  const [recommendations, setRecommendations] = useState<HistoricalRecommendation[]>([]);
   const [historyIndex, setHistoryIndex] = useState<HistoryMetadata[]>([]);
   
   useEffect(() => {
@@ -110,21 +90,13 @@ const MainApp: React.FC = () => {
 
   const saveToHistory = useCallback((newItem: InspirationData) => {
     const itemId = `echo_${Date.now()}`;
-    const metadata: HistoryMetadata = {
-      id: itemId,
-      eventTitle: newItem.eventTitle,
-      dateString: newItem.dateString,
-      imageUrl: newItem.imageUrl,
-      timestamp: Date.now()
-    };
+    const metadata: HistoryMetadata = { id: itemId, eventTitle: newItem.eventTitle, dateString: newItem.dateString, imageUrl: newItem.imageUrl, timestamp: Date.now() };
     try {
       localStorage.setItem(`${HISTORY_ITEM_PREFIX}${itemId}`, JSON.stringify(newItem));
       const updatedIndex = [metadata, ...historyIndex].slice(0, MAX_HISTORY_ITEMS);
       setHistoryIndex(updatedIndex);
       localStorage.setItem(HISTORY_INDEX_KEY, JSON.stringify(updatedIndex));
-    } catch (e) {
-      setError("Archive capacity reached. Please clear old echoes.");
-    }
+    } catch (e) { setError("Storage capacity reached."); }
   }, [historyIndex]);
 
   const loadFromHistory = useCallback((itemId: string) => {
@@ -134,9 +106,7 @@ const MainApp: React.FC = () => {
         setData(JSON.parse(saved));
         setLoadingState(LoadingState.COMPLETED);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (e) {
-        setError("This archival fragment is lost.");
-      }
+      } catch (e) { setError("Echo lost."); }
     }
   }, []);
 
@@ -153,92 +123,86 @@ const MainApp: React.FC = () => {
     return getDayOfYearInfo(new Date(year, month - 1, day));
   }, [selectedDate]);
 
-  const handleDeepScan = useCallback(async () => {
+  const handleScan = useCallback(async () => {
     try {
       setError(null);
       setLoadingState(LoadingState.SCANNING);
-      
-      // Internal intelligent selection: Fetch many, pick the most "intriguing"
-      const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 20);
-      const topEvent = recs[0]; // First one is prioritized by prompt
-      
+      const recs = await fetchHistoricalRecommendations(dayInfo.dateString, 10);
+      setRecommendations(recs);
+      setLoadingState(LoadingState.CHOOSING_EVENT);
+    } catch (err: any) {
+      setError(err.message || "Archival link severed.");
+      setLoadingState(LoadingState.ERROR);
+    }
+  }, [dayInfo]);
+
+  const handleSelectEvent = useCallback(async (event: HistoricalRecommendation) => {
+    try {
+      setError(null);
       setLoadingState(LoadingState.FETCHING_EVENT);
       const info = await fetchDailyInspiration({ 
         current: dayInfo.current, total: dayInfo.total, formatted: dayInfo.formatted, 
-        dateString: dayInfo.dateString, userName: authorName, selectedEvent: topEvent
+        dateString: dayInfo.dateString, userName: authorName, selectedEvent: event
       });
-      
       setData(info);
       setLoadingState(LoadingState.GENERATING_IMAGE);
-      const imageUrl = await generateInspirationalImage(info, "3:4");
-      const completeData = { ...info, imageUrl };
-      setData(completeData);
+      const imageUrl = await generateInspirationalImage(info);
+      setData(prev => prev ? { ...prev, imageUrl } : null);
       setLoadingState(LoadingState.COMPLETED);
     } catch (err: any) {
-      setError(err.message || "Archive link severed.");
+      setError(err.message || "Manifestation failed.");
       setLoadingState(LoadingState.ERROR);
     }
   }, [dayInfo, authorName]);
 
-  const isLoading = loadingState !== LoadingState.SETUP && loadingState !== LoadingState.COMPLETED && loadingState !== LoadingState.ERROR;
+  const isWorking = [LoadingState.SCANNING, LoadingState.FETCHING_EVENT, LoadingState.GENERATING_IMAGE].includes(loadingState);
 
   return (
-    <div className="w-full flex flex-col items-center min-h-screen px-6 py-12 max-w-7xl mx-auto overflow-hidden bg-slate-50/30 dark:bg-transparent">
+    <div className="w-full flex flex-col items-center min-h-screen px-4 py-12 max-w-7xl mx-auto text-center overflow-x-hidden">
       {loadingState === LoadingState.SETUP && (
-        <div className="max-w-3xl w-full my-auto space-y-20 animate-in slide-in-from-bottom-16 duration-1000">
-          <div className="p-12 sm:p-20 bg-white/70 dark:bg-slate-900/40 border dark:border-white/5 rounded-[4rem] shadow-2xl relative overflow-hidden backdrop-blur-3xl">
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[120px] pointer-events-none" />
-            <div className="text-center">
-              <h1 className="text-7xl font-serif font-black tracking-tighter text-slate-900 dark:text-white mb-4">Divine Echo</h1>
-              <p className="text-[12px] text-indigo-600 dark:text-indigo-400 uppercase font-black tracking-[0.8em]">Manifest Destiny 2026</p>
-              
-              <div className="mt-14 inline-flex items-center px-10 py-3 bg-slate-950/5 dark:bg-white/5 rounded-full gap-6">
-                 <div className="flex flex-col items-start">
-                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Temporal Progress</span>
-                    <span className="text-3xl font-black text-slate-800 dark:text-slate-100">{dayInfo.current} <span className="text-slate-200 dark:text-white/10">/</span> {dayInfo.total}</span>
-                 </div>
-                 <div className="h-10 w-px bg-slate-200 dark:bg-white/10" />
-                 <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Active Node</span>
-                    <span className="text-lg font-serif italic text-indigo-600 dark:text-indigo-400">{dayInfo.dateString}</span>
-                 </div>
-              </div>
-            </div>
+        <div className="max-w-3xl w-full my-auto space-y-16 animate-in slide-in-from-bottom-12 duration-1000">
+          <div className="p-10 sm:p-16 bg-white dark:bg-slate-900 border dark:border-white/5 rounded-[4rem] shadow-2xl backdrop-blur-3xl">
+            <h1 className="text-6xl font-serif font-black text-slate-900 dark:text-white mb-2">Divine Echo</h1>
+            <p className="text-[10px] uppercase font-black tracking-[0.8em] text-indigo-600 dark:text-indigo-400 mb-12">Temporal Wisdom 2026</p>
             
-            <div className="mt-16 space-y-10">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest font-black ml-6">Divine Witness</label>
-                  <input type="text" value={authorName} onChange={(e) => { setAuthorName(e.target.value); localStorage.setItem(AUTHOR_KEY, e.target.value); }} className="w-full px-8 py-6 rounded-[2rem] bg-slate-50 dark:bg-white/5 border dark:border-white/5 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-white font-medium shadow-inner" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest font-black ml-6">Temporal Window</label>
-                  <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-8 py-6 rounded-[2rem] bg-slate-50 dark:bg-white/5 border dark:border-white/5 focus:border-indigo-500 outline-none transition-all text-slate-900 dark:text-white font-medium shadow-inner" />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+              <div className="text-left space-y-2">
+                <label className="text-[10px] uppercase font-black tracking-widest text-slate-400 ml-4">Observer Name</label>
+                <input 
+                  type="text" 
+                  value={authorName} 
+                  onChange={(e) => { 
+                    setAuthorName(e.target.value); 
+                    localStorage.setItem(AUTHOR_KEY, e.target.value); 
+                  }} 
+                  placeholder="Enter your name..."
+                  className="w-full px-6 py-4 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/5 focus:border-indigo-500 outline-none text-slate-900 dark:text-white" 
+                />
               </div>
-              <button onClick={handleDeepScan} className="w-full py-9 bg-indigo-600 text-white rounded-[3rem] font-black uppercase tracking-[0.2em] text-[14px] shadow-[0_25px_50px_-12px_rgba(79,70,229,0.5)] hover:bg-indigo-700 hover:-translate-y-1 transition-all active:scale-95">Initiate Resonance Scan</button>
+              <div className="text-left space-y-2">
+                <label className="text-[10px] uppercase font-black tracking-widest text-slate-400 ml-4">Temporal Node</label>
+                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-6 py-4 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/5 focus:border-indigo-500 outline-none text-slate-900 dark:text-white" />
+              </div>
             </div>
+
+            <button onClick={handleScan} className="w-full py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-[12px] tracking-widest shadow-2xl hover:bg-indigo-700 active:scale-95 transition-all">Scan Archival Depths</button>
           </div>
 
           {historyIndex.length > 0 && (
-            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-12 duration-1000">
-              <div className="flex items-center justify-center gap-6">
-                <div className="h-px bg-slate-200 dark:bg-white/10 flex-1" />
-                <h3 className="text-[11px] uppercase font-black tracking-[1em] text-slate-400">Stored Echoes</h3>
-                <div className="h-px bg-slate-200 dark:bg-white/10 flex-1" />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {historyIndex.map((item, idx) => (
-                  <button key={item.id} onClick={() => loadFromHistory(item.id)} className="group relative flex items-center gap-6 p-6 bg-white dark:bg-slate-900 border dark:border-white/5 rounded-[2.5rem] hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 text-left shadow-lg overflow-hidden animate-in fade-in" style={{ animationDelay: `${idx * 100}ms` }}>
-                    <div className="w-20 h-20 rounded-3xl overflow-hidden border dark:border-white/5 shadow-md shrink-0">
-                      {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />}
+            <div className="space-y-8">
+              <h3 className="text-[10px] uppercase font-black tracking-[1em] text-slate-400">Stored Echoes</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {historyIndex.map((item) => (
+                  <button key={item.id} onClick={() => loadFromHistory(item.id)} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border dark:border-white/5 rounded-3xl shadow-lg hover:-translate-y-1 transition-all relative group">
+                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden shrink-0">
+                      {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />}
                     </div>
-                    <div className="flex-1 min-w-0 pr-10">
-                      <p className="text-base font-bold truncate text-slate-800 dark:text-slate-100">{item.eventTitle}</p>
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-1">{item.dateString}</p>
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-bold truncate text-slate-800 dark:text-white">{item.eventTitle}</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.dateString}</p>
                     </div>
-                    <div onClick={(e) => deleteFromHistory(e, item.id)} className="absolute top-6 right-6 p-2 text-slate-200 hover:text-red-500 transition-colors">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                    <div onClick={(e) => deleteFromHistory(e, item.id)} className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg">
+                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                     </div>
                   </button>
                 ))}
@@ -248,45 +212,53 @@ const MainApp: React.FC = () => {
         </div>
       )}
 
-      {isLoading && (
-        <div className="my-auto">
-          <ShimmerLoader state={loadingState} />
+      {loadingState === LoadingState.CHOOSING_EVENT && (
+        <div className="max-w-6xl w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="text-center">
+            <h2 className="text-5xl font-serif font-black text-slate-900 dark:text-white mb-2">Select Resonance</h2>
+            <p className="text-indigo-600 font-black tracking-widest uppercase text-[10px]">Pick an intriguing historical node</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recommendations.map((rec) => (
+              <button key={rec.id} onClick={() => handleSelectEvent(rec)} className="p-8 bg-white dark:bg-slate-900 border dark:border-white/10 rounded-[2.5rem] text-left hover:border-indigo-600 hover:shadow-2xl transition-all group shadow-xl">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 pr-4 leading-tight">{rec.title}</h3>
+                  <span className="text-[10px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full">{rec.year}</span>
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-serif italic line-clamp-3">{rec.description}</p>
+              </button>
+            ))}
+          </div>
+          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="text-slate-400 uppercase text-[10px] font-black tracking-widest hover:text-indigo-600">Back to Scanner</button>
         </div>
       )}
 
+      {isWorking && <ShimmerLoader state={loadingState} />}
+
       {data && loadingState === LoadingState.COMPLETED && (
-        <div className="w-full animate-in fade-in slide-in-from-bottom-12 duration-1000 pb-20">
-          <div className="max-w-5xl mx-auto flex flex-col items-center">
-            <InspirationCard data={data} onUpdate={(u) => setData(prev => prev ? {...prev, ...u} : null)} onSave={() => saveToHistory(data)} />
-            <button onClick={() => { setData(null); setLoadingState(LoadingState.SETUP); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="mt-20 px-20 py-8 bg-white/50 dark:bg-slate-900 border dark:border-white/5 text-slate-400 rounded-full text-[11px] uppercase font-black tracking-[0.5em] shadow-xl hover:text-indigo-600 transition-all active:scale-95 backdrop-blur-3xl">Return to Sanctuary</button>
-          </div>
+        <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-12 duration-1000 pb-20">
+          <InspirationCard data={data} onUpdate={(u) => setData(p => p ? {...p, ...u} : null)} onSave={() => saveToHistory(data)} />
+          <button onClick={() => { setData(null); setLoadingState(LoadingState.SETUP); }} className="mt-16 px-16 py-6 bg-white dark:bg-slate-800 text-slate-400 rounded-full text-[10px] uppercase font-black tracking-widest shadow-xl hover:text-indigo-600 transition-all">Back to Home</button>
         </div>
       )}
 
       {loadingState === LoadingState.ERROR && (
-        <div className="my-auto text-center p-16 bg-white dark:bg-slate-900 rounded-[4rem] border border-red-100 dark:border-red-900/20 max-w-lg shadow-2xl animate-in zoom-in-95">
-          <div className="w-24 h-24 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-10">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          </div>
-          <h2 className="text-4xl font-serif font-bold text-red-600 mb-6">Manifestation Error</h2>
-          <p className="text-lg text-slate-500 dark:text-slate-400 mb-10 leading-relaxed">{error}</p>
-          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-7 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-[12px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-xl">Back to Sanctuary</button>
+        <div className="my-auto text-center p-12 bg-white dark:bg-slate-900 rounded-[3rem] border-2 border-red-500/20 max-w-lg shadow-2xl">
+          <h2 className="text-3xl font-serif font-bold text-red-600 mb-4">Connection Error</h2>
+          <p className="text-slate-500 mb-10">{error}</p>
+          <button onClick={() => setLoadingState(LoadingState.SETUP)} className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-[11px]">Retry</button>
         </div>
       )}
     </div>
   );
 };
 
-const App: React.FC = () => {
-  return (
-    <div className="min-h-screen font-sans transition-colors duration-500 selection:bg-indigo-500 selection:text-white">
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={<MainApp />} />
-        </Routes>
-      </HashRouter>
-    </div>
-  );
-};
+const App: React.FC = () => (
+  <HashRouter>
+    <Routes>
+      <Route path="/" element={<MainApp />} />
+    </Routes>
+  </HashRouter>
+);
 
 export default App;
