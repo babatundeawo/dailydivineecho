@@ -45,26 +45,31 @@ export const fetchDailyInspiration = async (dayInfo: {
     The year is 2026. Date: ${dayInfo.dateString}, 2026.
     Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year}) - ${dayInfo.selectedEvent.description}
 
-    WRITEUP STYLE REQUIREMENTS (CRITICAL):
-    - Tone: Deeply human, expressive, energetic, slightly sarcastic where appropriate, and full of personality.
-    - Literary Devices: Use metaphors, rhetorical questions, human exclamations (e.g., "Goodness!", "Imagine that!"), and witty asides.
-    - ABSOLUTELY NO HYPHENS: Use commas, colons, or periods instead. Do not use the "-" character at all.
-    - NO AI CLICHES: Avoid words like "tapestry", "delve", "beacon", "testament", "embark", or "realm".
+    CONTENT STRUCTURE (THE THREE PILLARS):
+    Every single platform post (LinkedIn, FB, WeChat, etc.) MUST weave through these three specific phases:
+    1. THE SPARK (History): Retell the historical node with vivid, cinematic energy. Make us feel the era and the moment.
+    2. THE RESONANCE (Universal Wisdom): Extract a profound life lesson for EVERYONE. This must be inclusive: old or young, professional or artisan, master or servant. Address the universal human condition—how this history relates to our shared struggles and triumphs today.
+    3. THE LIGHT (Spiritual Essence): A deep Christian insight that bridges the wisdom to the Divine. Anchor this with the specific Bible verse selected.
 
-    PLATFORM SPECIFIC CONSTRAINTS:
-    1. LinkedIn: Target ~3000 characters. Professional yet deeply personal. High impact storytelling.
-    2. Facebook: Target ~3000 characters. Conversational, community focused, and heartwarming.
-    3. WeChat: Target ~3000 characters. Philosophical, detailed, and rich in context.
-    4. Instagram: Target ~500 characters. Visual storytelling. 5 trending hashtags.
-    5. Threads: Target ~500 characters. Quick thoughts, punchy, engagement focused. 5 hashtags.
-    6. WhatsApp: Target ~500 characters. Direct, punchy, shareable wisdom. 5 hashtags.
-    7. X (Twitter): Target ~280 characters. Extremely concise and viral. Exactly 3 trending hashtags.
+    CORE PHILOSOPHY:
+    - Tone: Humanly enthusiastic, soulful, and witty.
+    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (Use commas or colons).
+    - NO AI CLICHES: Do not use "tapestry", "delve", "beacon", "testament", "embark", or "realm".
 
-    JSON STRUCTURE:
+    PLATFORM CONSTRAINTS:
+    - LinkedIn/FB/WeChat: Long-form storytelling (~3000-5000 chars).
+    - Instagram/Threads/WhatsApp/Twitter: Short, punchy highlights.
+
+    REQUIREMENTS:
+    - Bible Verse: Select one INTIMATELY related to the themes of the historical event.
+    - Image Overlay Text: MAX 4 WORDS. This text will be centered and massive.
+    - Image Prompt: Breathtaking, photorealistic, cinematic (clear, bright, and vibrant).
+
+    Return as JSON:
     {
       "eventTitle": "...",
       "eventDescription": "...",
-      "imageOverlayText": "...", (MAX 4 WORDS)
+      "imageOverlayText": "...",
       "bibleVerse": "...",
       "bibleReference": "...",
       "reflectionPrompt": "...",
