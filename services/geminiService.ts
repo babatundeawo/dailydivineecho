@@ -45,36 +45,26 @@ export const fetchDailyInspiration = async (dayInfo: {
     The year is 2026. Date: ${dayInfo.dateString}, 2026.
     Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year}) - ${dayInfo.selectedEvent.description}
 
-    WRITEUP STRUCTURE (THE RESONANCE ARC):
-    Every platform post must follow this 3 stage flow:
-    1. THE SPARK: Retell the historical event with high energy and vivid metaphors.
-    2. THE PIVOT: A natural conversational bridge to modern life.
-    3. THE LIGHT: A spiritual insight grounded in a specific Bible verse.
+    WRITEUP STYLE REQUIREMENTS (CRITICAL):
+    - Tone: Deeply human, expressive, energetic, slightly sarcastic where appropriate, and full of personality.
+    - Literary Devices: Use metaphors, rhetorical questions, human exclamations (e.g., "Goodness!", "Imagine that!"), and witty asides.
+    - ABSOLUTELY NO HYPHENS: Use commas, colons, or periods instead. Do not use the "-" character at all.
+    - NO AI CLICHES: Avoid words like "tapestry", "delve", "beacon", "testament", "embark", or "realm".
 
-    CORE PHILOSOPHY:
-    - Tone: Humanly enthusiastic, witty, and caffeinated.
-    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED.
-    - NO AI CLICHES: Do not use "tapestry", "delve", "beacon", "testament", "embark", or "realm".
+    PLATFORM SPECIFIC CONSTRAINTS:
+    1. LinkedIn: Target ~3000 characters. Professional yet deeply personal. High impact storytelling.
+    2. Facebook: Target ~3000 characters. Conversational, community focused, and heartwarming.
+    3. WeChat: Target ~3000 characters. Philosophical, detailed, and rich in context.
+    4. Instagram: Target ~500 characters. Visual storytelling. 5 trending hashtags.
+    5. Threads: Target ~500 characters. Quick thoughts, punchy, engagement focused. 5 hashtags.
+    6. WhatsApp: Target ~500 characters. Direct, punchy, shareable wisdom. 5 hashtags.
+    7. X (Twitter): Target ~280 characters. Extremely concise and viral. Exactly 3 trending hashtags.
 
-    STRICT PLATFORM CONSTRAINTS:
-    1. LinkedIn: Target exactly 3000 chars.
-    2. Facebook: Target exactly 3000 chars.
-    3. WeChat: Target exactly 5000 chars.
-    4. Instagram: Max 2200 chars. Include exactly 5 hashtags.
-    5. Threads: Max 500 chars.
-    6. X (Twitter): Max 280 chars.
-    7. WhatsApp: Max 500 chars.
-
-    REQUIREMENTS:
-    - Bible Verse: Select one INTIMATELY related to the themes of ${dayInfo.selectedEvent.title}.
-    - Image Overlay Text: ABSOLUTELY MAX 4 WORDS. This text will be centered and massive. It must be a powerful "Echo" of the event.
-    - Image Prompt: Detailed, photorealistic, cinematic (35mm lens, f/1.8). No text on image. Focus on the core imagery of the event: ${dayInfo.selectedEvent.title}.
-
-    Return as JSON:
+    JSON STRUCTURE:
     {
       "eventTitle": "...",
       "eventDescription": "...",
-      "imageOverlayText": "...",
+      "imageOverlayText": "...", (MAX 4 WORDS)
       "bibleVerse": "...",
       "bibleReference": "...",
       "reflectionPrompt": "...",
