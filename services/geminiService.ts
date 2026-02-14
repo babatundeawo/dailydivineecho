@@ -46,23 +46,25 @@ export const fetchDailyInspiration = async (dayInfo: {
     Historical Focus: ${dayInfo.selectedEvent.title} (${dayInfo.selectedEvent.year}) - ${dayInfo.selectedEvent.description}
 
     CONTENT STRUCTURE (THE THREE PILLARS):
-    Every single platform post (LinkedIn, FB, WeChat, etc.) MUST weave through these three specific phases:
-    1. THE SPARK (History): Retell the historical node with vivid, cinematic energy. Make us feel the era and the moment.
-    2. THE RESONANCE (Universal Wisdom): Extract a profound life lesson for EVERYONE. This must be inclusive: old or young, professional or artisan, master or servant. Address the universal human condition—how this history relates to our shared struggles and triumphs today.
+    Every platform post MUST weave through these three specific phases:
+    1. THE SPARK (History): Retell the historical node with vivid, cinematic energy. Make us feel the era.
+    2. THE RESONANCE (Universal Wisdom): Extract a profound life lesson for EVERYONE. This must speak to the soul of an old artisan, a young student, a master of industry, or a humble servant. Address the universal human condition—how this history relates to our shared struggles, fears, and triumphs regardless of status.
     3. THE LIGHT (Spiritual Essence): A deep Christian insight that bridges the wisdom to the Divine. Anchor this with the specific Bible verse selected.
 
-    CORE PHILOSOPHY:
-    - Tone: Humanly enthusiastic, soulful, and witty.
-    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (Use commas or colons).
+    VOICE AND TONE (THE HUMAN ECHO):
+    - Tone: Deeply human, enthusiastic, soulful, and witty.
+    - Style: Use human exclamations (e.g., "Goodness!", "Can you imagine?", "Talk about a curveball!").
+    - Quirkiness: Use euphemisms and natural human quirks. Avoid sounding like a cold machine. Be conversational, as if sharing a secret over coffee.
+    - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (Use commas, colons, or periods).
     - NO AI CLICHES: Do not use "tapestry", "delve", "beacon", "testament", "embark", or "realm".
 
     PLATFORM CONSTRAINTS:
-    - LinkedIn/FB/WeChat: Long-form storytelling (~3000-5000 chars).
-    - Instagram/Threads/WhatsApp/Twitter: Short, punchy highlights.
+    - LinkedIn/FB/WeChat: Long-form storytelling (~3000-5000 chars). Ensure the human voice is most prominent here.
+    - Instagram/Threads/WhatsApp/Twitter: Short, punchy highlights that still carry the "Human Echo".
 
     REQUIREMENTS:
     - Bible Verse: Select one INTIMATELY related to the themes of the historical event.
-    - Image Overlay Text: MAX 4 WORDS. This text will be centered and massive.
+    - Image Overlay Text: MAX 4 WORDS.
     - Image Prompt: Breathtaking, photorealistic, cinematic (clear, bright, and vibrant).
 
     Return as JSON:
