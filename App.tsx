@@ -85,18 +85,32 @@ const MainApp: React.FC = () => {
   
   useEffect(() => {
     const savedIndex = localStorage.getItem(HISTORY_INDEX_KEY);
-    if (savedIndex) try { setHistoryIndex(JSON.parse(savedIndex)); } catch (e) {}
+    if (savedIndex) {
+      try { 
+        setHistoryIndex(JSON.parse(savedIndex)); 
+      } catch (e) {
+        console.error("Failed to load history index", e);
+      }
+    }
   }, []);
 
   const saveToHistory = useCallback((newItem: InspirationData) => {
     const itemId = `echo_${Date.now()}`;
-    const metadata: HistoryMetadata = { id: itemId, eventTitle: newItem.eventTitle, dateString: newItem.dateString, imageUrl: newItem.imageUrl, timestamp: Date.now() };
+    const metadata: HistoryMetadata = { 
+      id: itemId, 
+      eventTitle: newItem.eventTitle, 
+      dateString: newItem.dateString, 
+      imageUrl: newItem.imageUrl, 
+      timestamp: Date.now() 
+    };
     try {
       localStorage.setItem(`${HISTORY_ITEM_PREFIX}${itemId}`, JSON.stringify(newItem));
       const updatedIndex = [metadata, ...historyIndex].slice(0, MAX_HISTORY_ITEMS);
       setHistoryIndex(updatedIndex);
       localStorage.setItem(HISTORY_INDEX_KEY, JSON.stringify(updatedIndex));
-    } catch (e) { setError("Storage capacity reached."); }
+    } catch (e) { 
+      setError("Storage capacity reached."); 
+    }
   }, [historyIndex]);
 
   const loadFromHistory = useCallback((itemId: string) => {
@@ -106,7 +120,9 @@ const MainApp: React.FC = () => {
         setData(JSON.parse(saved));
         setLoadingState(LoadingState.COMPLETED);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (e) { setError("Echo lost."); }
+      } catch (e) { 
+        setError("Echo lost."); 
+      }
     }
   }, []);
 
@@ -189,22 +205,33 @@ const MainApp: React.FC = () => {
           </div>
 
           {historyIndex.length > 0 && (
-            <div className="space-y-8">
+            <div className="space-y-8 pb-12">
               <h3 className="text-[10px] uppercase font-black tracking-[1em] text-slate-400">Stored Echoes</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {historyIndex.map((item) => (
-                  <button key={item.id} onClick={() => loadFromHistory(item.id)} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border dark:border-white/5 rounded-3xl shadow-lg hover:-translate-y-1 transition-all relative group">
-                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden shrink-0">
-                      {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />}
-                    </div>
-                    <div className="text-left min-w-0">
-                      <p className="text-sm font-bold truncate text-slate-800 dark:text-white">{item.eventTitle}</p>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.dateString}</p>
-                    </div>
-                    <div onClick={(e) => deleteFromHistory(e, item.id)} className="absolute -top-2 -right-2 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg">
-                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </div>
-                  </button>
+                  <div key={item.id} className="relative group">
+                    <button 
+                      onClick={() => loadFromHistory(item.id)} 
+                      className="w-full flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border dark:border-white/5 rounded-3xl shadow-lg hover:-translate-y-1 transition-all"
+                    >
+                      <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden shrink-0">
+                        {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />}
+                      </div>
+                      <div className="text-left min-w-0 flex-1">
+                        <p className="text-sm font-bold truncate text-slate-800 dark:text-white">{item.eventTitle}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.dateString}</p>
+                      </div>
+                    </button>
+                    <button 
+                      onClick={(e) => deleteFromHistory(e, item.id)} 
+                      title="Delete Echo"
+                      className="absolute -top-2 -right-2 p-3 bg-red-600 text-white rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-xl z-20 border-2 border-white dark:border-slate-900"
+                    >
+                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                       </svg>
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -237,8 +264,17 @@ const MainApp: React.FC = () => {
 
       {data && loadingState === LoadingState.COMPLETED && (
         <div className="w-full max-w-7xl animate-in fade-in slide-in-from-bottom-12 duration-1000 pb-20">
-          <InspirationCard data={data} onUpdate={(u) => setData(p => p ? {...p, ...u} : null)} onSave={() => saveToHistory(data)} />
-          <button onClick={() => { setData(null); setLoadingState(LoadingState.SETUP); }} className="mt-16 px-16 py-6 bg-white dark:bg-slate-800 text-slate-400 rounded-full text-[10px] uppercase font-black tracking-widest shadow-xl hover:text-indigo-600 transition-all">Back to Home</button>
+          <InspirationCard 
+            data={data} 
+            onUpdate={(u) => setData(p => p ? {...p, ...u} : null)} 
+            onSave={() => saveToHistory(data)} 
+          />
+          <button 
+            onClick={() => { setData(null); setLoadingState(LoadingState.SETUP); }} 
+            className="mt-16 px-16 py-6 bg-white dark:bg-slate-800 text-slate-400 rounded-full text-[10px] uppercase font-black tracking-widest shadow-xl hover:text-indigo-600 transition-all"
+          >
+            Back to Home
+          </button>
         </div>
       )}
 

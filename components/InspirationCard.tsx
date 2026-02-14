@@ -2,7 +2,6 @@
 import React, { useRef, useState } from 'react';
 import { InspirationData } from '../types.ts';
 import html2canvas from 'html2canvas';
-import { generateTTS } from '../services/geminiService.ts';
 
 interface InspirationCardProps {
   data: InspirationData;
@@ -12,7 +11,6 @@ interface InspirationCardProps {
 
 const InspirationCard: React.FC<InspirationCardProps> = ({ data, onSave, onUpdate }) => {
   const captureRef = useRef<HTMLDivElement>(null);
-  const [activeVoicePlatform, setActiveVoicePlatform] = useState<string | null>(null);
   const [copiedType, setCopiedType] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -53,43 +51,6 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onSave, onUpdat
     navigator.clipboard.writeText(fullText);
     setCopiedType(type);
     setTimeout(() => setCopiedType(null), 2000);
-  };
-
-  const handleShare = async (platform: string, content: string, hashtags: string) => {
-    const fullText = generateFullPost(content, hashtags);
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `Divine Echo: ${data.eventTitle}`,
-          text: fullText,
-          url: window.location.href
-        });
-      } catch (e) { console.error("Share failed", e); }
-    } else {
-      handleCopy(platform, content, hashtags);
-    }
-  };
-
-  const handleListen = async (platform: string, text: string) => {
-    if (activeVoicePlatform) return;
-    try {
-      setActiveVoicePlatform(platform);
-      const base64Audio = await generateTTS(text);
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-      const binaryString = atob(base64Audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-      const audioBuffer = await audioContext.decodeAudioData(bytes.buffer.slice(0));
-      
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
-      source.onended = () => setActiveVoicePlatform(null);
-      source.start();
-    } catch (err) {
-      console.error("TTS Error:", err);
-      setActiveVoicePlatform(null);
-    }
   };
 
   const cardWidth = 1080;
@@ -156,7 +117,6 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onSave, onUpdat
   );
 
   const PlatformCard = ({ name, content, hashtags, color, limit, icon }: { name: string, content: string, hashtags: string, color: string, limit: number, icon: React.ReactNode }) => {
-    const isSpeaking = activeVoicePlatform === name;
     if (!content) return null;
     return (
       <div className="bg-white dark:bg-slate-900 border dark:border-white/5 rounded-[3rem] shadow-xl overflow-hidden transition-all duration-500 hover:shadow-2xl flex flex-col">
@@ -169,14 +129,15 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onSave, onUpdat
             </div>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => handleListen(name, content)} className={`p-3 rounded-xl transition-all ${isSpeaking ? 'bg-indigo-600 text-white animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.978 5.978 0 0115 10a5.978 5.978 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.979 3.979 0 0013 10a3.979 3.979 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" /></svg>
-            </button>
-            <button onClick={() => handleCopy(name, content, hashtags)} className={`p-3 rounded-xl transition-all ${copiedType === name ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" /><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" /></svg>
-            </button>
-            <button onClick={() => handleShare(name, content, hashtags)} className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
+            <button 
+              onClick={() => handleCopy(name, content, hashtags)} 
+              title="Copy to clipboard"
+              className={`p-3 rounded-xl transition-all ${copiedType === name ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+            >
+              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+              </svg>
             </button>
           </div>
         </div>
