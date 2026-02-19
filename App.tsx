@@ -5,6 +5,7 @@ import { getDayOfYearInfo } from './utils/dateUtils.ts';
 import { fetchDailyInspiration, generateInspirationalImage, fetchHistoricalRecommendations } from './services/geminiService.ts';
 import { InspirationData, LoadingState, HistoricalRecommendation } from './types.ts';
 import InspirationCard from './components/InspirationCard.tsx';
+import AboutPage from './components/AboutPage.tsx';
 
 const HISTORY_INDEX_KEY = 'divine_echo_index_v7';
 const HISTORY_ITEM_PREFIX = 'divine_echo_item_v7_';
@@ -202,6 +203,12 @@ const MainApp: React.FC = () => {
             </div>
 
             <button onClick={handleScan} className="w-full py-7 bg-indigo-600 text-white rounded-[2.5rem] font-black uppercase text-[12px] tracking-widest shadow-2xl hover:bg-indigo-700 active:scale-95 transition-all">Scan Archival Depths</button>
+            
+            <div className="pt-8">
+              <Link to="/about" className="text-[10px] uppercase font-black tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                What is Divine Echo?
+              </Link>
+            </div>
           </div>
 
           {historyIndex.length > 0 && (
@@ -293,6 +300,7 @@ const App: React.FC = () => (
   <HashRouter>
     <Routes>
       <Route path="/" element={<MainApp />} />
+      <Route path="/about" element={<AboutPage />} />
     </Routes>
   </HashRouter>
 );
