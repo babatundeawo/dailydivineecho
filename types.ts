@@ -24,23 +24,15 @@ export interface InspirationData {
   bibleReference: string;
   reflectionPrompt: string;
   
-  // Dedicated Platform Posts
-  linkedInPost: string;
-  facebookPost: string;
-  wechatPost: string;
-  instagramPost: string;
-  threadsPost: string;
-  twitterPost: string;
-  whatsappPost: string;
+  // Consolidated Platform Posts
+  longPost: string;
+  mediumPost: string;
+  shortPost: string;
 
-  // Dedicated Platform Hashtags
-  linkedInHashtags: string;
-  facebookHashtags: string;
-  wechatHashtags: string;
-  instagramHashtags: string;
-  threadsHashtags: string;
-  twitterHashtags: string;
-  whatsappHashtags: string;
+  // Consolidated Platform Hashtags
+  longHashtags: string;
+  mediumHashtags: string;
+  shortHashtags: string;
 
   imagePrompt: string;
   imageUrl?: string;

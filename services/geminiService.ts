@@ -14,7 +14,7 @@ export const fetchHistoricalRecommendations = async (
     Return them as a JSON array of objects with:
     - id: a unique short string
     - title: max 5 words
-    - description: max 25 words (make it humanly intriguing and evocative)
+    - description: max 60 words (make it humanly intriguing, evocative, and detailed enough for the user to make an informed choice)
     - year: the year it happened
     - era: the era it belongs to
     - category: the category of impact
@@ -59,13 +59,14 @@ export const fetchDailyInspiration = async (dayInfo: {
     - NO AI CLICHES: Do not use "tapestry", "delve", "beacon", "testament", "embark", or "realm".
 
     PLATFORM CONSTRAINTS:
-    - LinkedIn/FB/WeChat: Long-form storytelling (~3000-5000 chars). Ensure the human voice is most prominent here.
-    - Instagram/Threads/WhatsApp/Twitter: Short, punchy highlights that still carry the "Human Echo".
+    - longPost: LinkedIn/Facebook/WeChat/WhatsApp Channel (not more than 3000 characters).
+    - mediumPost: Instagram/Threads (not more than 500 characters).
+    - shortPost: X/WhatsApp status (not more than 280 characters).
 
     REQUIREMENTS:
     - Bible Verse: Select one INTIMATELY related to the themes of the historical event.
     - Image Overlay Text: MAX 4 WORDS.
-    - Image Prompt: Breathtaking, photorealistic, cinematic (clear, bright, and vibrant).
+    - Image Prompt: Extremely realistic, high-fidelity, photorealistic masterpiece (clear, bright, and vibrant). Ensure it looks like a real photograph, not AI art.
 
     Return as JSON:
     {
@@ -75,13 +76,9 @@ export const fetchDailyInspiration = async (dayInfo: {
       "bibleVerse": "...",
       "bibleReference": "...",
       "reflectionPrompt": "...",
-      "linkedInPost": "...", "linkedInHashtags": "...",
-      "facebookPost": "...", "facebookHashtags": "...",
-      "wechatPost": "...", "wechatHashtags": "...",
-      "instagramPost": "...", "instagramHashtags": "...",
-      "threadsPost": "...", "threadsHashtags": "...",
-      "twitterPost": "...", "twitterHashtags": "...",
-      "whatsappPost": "...", "whatsappHashtags": "...",
+      "longPost": "...", "longHashtags": "...",
+      "mediumPost": "...", "mediumHashtags": "...",
+      "shortPost": "...", "shortHashtags": "...",
       "imagePrompt": "..."
     }
   `;
@@ -110,7 +107,7 @@ export const fetchDailyInspiration = async (dayInfo: {
 export const generateInspirationalImage = async (
   data: InspirationData
 ): Promise<string> => {
-  const prompt = `A breathtaking masterwork of photorealism, award-winning photography, National Geographic style. Subject: ${data.eventTitle}. ${data.imagePrompt}. Lighting: Vibrant, luminous, and bright natural light. Ensure sharp clarity, vivid colors, and visible details even in shadows. NO TEXT ON IMAGE. 8k resolution, cinematic depth of field, clear and bright atmosphere.`;
+  const prompt = `An extremely realistic, high-fidelity masterwork of photorealism. This must look like a real, authentic photograph from a professional camera. Subject: ${data.eventTitle}. ${data.imagePrompt}. Lighting: Vibrant, luminous, and bright natural light. Ensure sharp clarity, vivid colors, and visible details even in shadows. NO TEXT ON IMAGE. 8k resolution, cinematic depth of field, clear and bright atmosphere.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',

@@ -259,7 +259,7 @@ const MainApp: React.FC = () => {
                   <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 pr-4 leading-tight">{rec.title}</h3>
                   <span className="text-[10px] font-black bg-indigo-600 text-white px-3 py-1 rounded-full">{rec.year}</span>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-serif italic line-clamp-3">{rec.description}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-serif italic">{rec.description}</p>
               </button>
             ))}
           </div>
