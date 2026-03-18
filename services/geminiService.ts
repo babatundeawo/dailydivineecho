@@ -53,14 +53,13 @@ export const fetchDailyInspiration = async (dayInfo: {
 
     VOICE AND TONE (THE HUMAN ECHO):
     - Tone: Deeply human, enthusiastic, soulful, witty, and slightly satirical/sarcastic where appropriate.
-    - Style: Use human exclamations (e.g., "Chai!", "Nawa o!", "Goodness!", "Can you imagine?").
-    - Lingo: Embed Nigerian lingo and slang naturally (e.g., "Omo", "Abeg", "No be small thing", "Matter don cast", "Shey you get?").
+    - Style: Use human exclamations (e.g., "Goodness!", "Can you imagine?", "What a moment!").
     - Quirkiness: Use euphemisms, mannerisms, and natural human quirks. Avoid sounding like a cold machine. Be conversational, as if sharing a secret over coffee.
     - ZERO HYPHEN POLICY: ABSOLUTELY NO HYPHENS ALLOWED (Use commas, colons, or periods).
     - NO AI CLICHES: Do not use "tapestry", "delve", "beacon", "testament", "embark", or "realm".
 
     PLATFORM CONSTRAINTS:
-    - longPost: LinkedIn/Facebook/WeChat/WhatsApp Channel. Length: STRICTLY between 2000 and 3000 characters.
+    - longPost: LinkedIn/Facebook/WeChat/WhatsApp Channel. Length: STRICTLY between 2000 and 3000 characters. Break the text into MULTIPLE short, readable paragraphs (at least 6-8 paragraphs) to ensure readability. Do NOT just use 3 long blocks.
     - mediumPost: Instagram/Threads (not more than 500 characters).
     - shortPost: X/WhatsApp status (not more than 280 characters).
 
