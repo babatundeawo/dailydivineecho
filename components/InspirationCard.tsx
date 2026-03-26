@@ -87,7 +87,7 @@ const InspirationCard: React.FC<InspirationCardProps> = ({ data, onSave, onUpdat
         </div>
 
         <div className="flex-1 flex flex-col justify-start pt-32 items-center w-full px-16 text-center">
-          <h1 className="text-[72px] font-serif font-black text-white leading-[0.95] tracking-tight italic uppercase drop-shadow-[0_15px_45px_rgba(0,0,0,0.9)] scale-y-110">
+          <h1 className="text-[60px] font-serif font-black text-white leading-[0.95] tracking-tight italic uppercase drop-shadow-[0_15px_45px_rgba(0,0,0,0.9)] scale-y-110">
             {data.imageOverlayText ? `“${data.imageOverlayText}”` : `“${data.eventTitle}”`}
           </h1>
         </div>
