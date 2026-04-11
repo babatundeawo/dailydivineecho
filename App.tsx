@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { Trash2, History, Info } from 'lucide-react';
 import { getDayOfYearInfo } from './utils/dateUtils.ts';
 import { fetchDailyInspiration, generateInspirationalImage, fetchHistoricalRecommendations } from './services/geminiService.ts';
 import { InspirationData, LoadingState, HistoricalRecommendation } from './types.ts';
@@ -212,34 +213,72 @@ const MainApp: React.FC = () => {
           </div>
 
           {historyIndex.length > 0 && (
-            <div className="space-y-8 pb-12">
-              <h3 className="text-[10px] uppercase font-black tracking-[1em] text-slate-400">Stored Echoes</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {historyIndex.map((item) => (
-                  <div key={item.id} className="relative group">
-                    <button 
-                      onClick={() => loadFromHistory(item.id)} 
-                      className="w-full flex items-center gap-4 p-4 bg-white dark:bg-slate-900 border dark:border-white/5 rounded-3xl shadow-lg hover:-translate-y-1 transition-all"
-                    >
-                      <div className="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden shrink-0">
-                        {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover" alt="" />}
-                      </div>
-                      <div className="text-left min-w-0 flex-1">
-                        <p className="text-sm font-bold truncate text-slate-800 dark:text-white">{item.eventTitle}</p>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.dateString}</p>
-                      </div>
-                    </button>
-                    <button 
-                      onClick={(e) => deleteFromHistory(e, item.id)} 
-                      title="Delete Echo"
-                      className="absolute -top-2 -right-2 p-3 bg-red-600 text-white rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-xl z-20 border-2 border-white dark:border-slate-900"
-                    >
-                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                       </svg>
-                    </button>
+            <div className="space-y-10 pb-20 w-full overflow-hidden">
+              <div className="flex items-center justify-between px-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-600/10 rounded-lg">
+                    <History className="w-4 h-4 text-indigo-600" />
                   </div>
-                ))}
+                  <h3 className="text-[10px] uppercase font-black tracking-[1em] text-slate-400">Stored Echoes</h3>
+                </div>
+                <div className="h-px flex-1 bg-slate-100 dark:bg-white/5 mx-8 hidden sm:block" />
+              </div>
+
+              <div className="relative group">
+                <div className="flex gap-6 overflow-x-auto pb-8 px-4 snap-x snap-mandatory no-scrollbar scroll-smooth">
+                  {historyIndex.map((item) => (
+                    <div 
+                      key={item.id} 
+                      className="relative flex-none w-[280px] sm:w-[320px] snap-start"
+                    >
+                      <div className="relative group/card overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 border dark:border-white/5 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                        {/* Thumbnail Image */}
+                        <div className="aspect-[4/5] w-full relative overflow-hidden">
+                          {item.imageUrl ? (
+                            <img 
+                              src={item.imageUrl} 
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110" 
+                              alt="" 
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                              <History className="w-12 h-12 text-slate-300 dark:text-slate-700" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover/card:opacity-80 transition-opacity" />
+                          
+                          {/* Content Overlay */}
+                          <div className="absolute inset-0 p-8 flex flex-col justify-end text-left">
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-2">{item.dateString}</p>
+                            <h4 className="text-lg font-serif font-bold text-white leading-tight mb-4 line-clamp-2 drop-shadow-md">
+                              {item.eventTitle}
+                            </h4>
+                            
+                            <button 
+                              onClick={() => loadFromHistory(item.id)}
+                              className="w-full py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-indigo-600 transition-all"
+                            >
+                              Relive Echo
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Delete Button */}
+                        <button 
+                          onClick={(e) => deleteFromHistory(e, item.id)} 
+                          title="Delete Echo"
+                          className="absolute top-4 right-4 p-3 bg-red-600/90 text-white rounded-full opacity-0 group-hover/card:opacity-100 transition-all hover:bg-red-700 shadow-xl z-20 backdrop-blur-sm scale-75 group-hover/card:scale-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Scroll Indicators (Optional but nice) */}
+                <div className="absolute left-0 top-0 bottom-8 w-12 bg-gradient-to-r from-slate-50 dark:from-slate-950 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute right-0 top-0 bottom-8 w-12 bg-gradient-to-l from-slate-50 dark:from-slate-950 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
           )}
