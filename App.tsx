@@ -11,7 +11,7 @@ import AboutPage from './components/AboutPage.tsx';
 const HISTORY_INDEX_KEY = 'divine_echo_index_v7';
 const HISTORY_ITEM_PREFIX = 'divine_echo_item_v7_';
 const AUTHOR_KEY = 'divine_echo_author_name_v7';
-const DEFAULT_AUTHOR = "Awaiting Witness";
+const DEFAULT_AUTHOR = "Babátúndé Awóyẹmí";
 const MAX_HISTORY_ITEMS = 50;
 
 interface HistoryMetadata {
@@ -80,8 +80,8 @@ const MainApp: React.FC = () => {
   const [loadingState, setLoadingState] = useState<LoadingState>(LoadingState.SETUP);
   const [data, setData] = useState<InspirationData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
-  const [authorName, setAuthorName] = useState<string>(localStorage.getItem(AUTHOR_KEY) || DEFAULT_AUTHOR);
+  const [selectedDate] = useState<string>(getLocalDateString());
+  const [authorName] = useState<string>(DEFAULT_AUTHOR);
   const [recommendations, setRecommendations] = useState<HistoricalRecommendation[]>([]);
   const [historyIndex, setHistoryIndex] = useState<HistoryMetadata[]>([]);
   
@@ -183,23 +183,15 @@ const MainApp: React.FC = () => {
             <h1 className="text-6xl font-serif font-black text-slate-900 dark:text-white mb-2">Divine Echo</h1>
             <p className="text-[10px] uppercase font-black tracking-[0.8em] text-indigo-600 dark:text-indigo-400 mb-12">Temporal Wisdom 2026</p>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
-              <div className="text-left space-y-2">
-                <label className="text-[10px] uppercase font-black tracking-widest text-slate-400 ml-4">Observer Name</label>
-                <input 
-                  type="text" 
-                  value={authorName} 
-                  onChange={(e) => { 
-                    setAuthorName(e.target.value); 
-                    localStorage.setItem(AUTHOR_KEY, e.target.value); 
-                  }} 
-                  placeholder="Enter your name..."
-                  className="w-full px-6 py-4 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/5 focus:border-indigo-500 outline-none text-slate-900 dark:text-white" 
-                />
+            <div className="flex flex-col items-center justify-center space-y-4 mb-12">
+              <div className="text-center">
+                <p className="text-sm font-serif italic text-slate-500 dark:text-slate-400">Witnessing as</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{authorName}</p>
               </div>
-              <div className="text-left space-y-2">
-                <label className="text-[10px] uppercase font-black tracking-widest text-slate-400 ml-4">Temporal Node</label>
-                <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full px-6 py-4 rounded-3xl bg-slate-50 dark:bg-white/5 border dark:border-white/5 focus:border-indigo-500 outline-none text-slate-900 dark:text-white" />
+              <div className="h-px w-12 bg-slate-100 dark:bg-white/10" />
+              <div className="text-center">
+                <p className="text-sm font-serif italic text-slate-500 dark:text-slate-400">Temporal Node</p>
+                <p className="text-xl font-bold text-slate-900 dark:text-white">{dayInfo.fullDateString}</p>
               </div>
             </div>
 
